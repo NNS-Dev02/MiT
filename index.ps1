@@ -2,13 +2,13 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 # Cấu hình thư mục làm việc và file nguồn
-$folder = "C:\Tool_MiT\ToolMiTGroup"
+$folder = "C:\MiT"
 if (-not (Test-Path $folder)) { New-Item -Path $folder -ItemType Directory | Out-Null }
 
 $imgPath   = Join-Path $folder "logo.png"
 $appsPath  = Join-Path $folder "apps.txt"
-$logoUrl   = "https://raw.githubusercontent.com/NNS-Dev02/ToolMitGroup/main/logo.png"
-$appsUrl   = "https://raw.githubusercontent.com/NNS-Dev02/ToolMitGroup/main/apps.txt"
+$logoUrl   = "https://raw.githubusercontent.com/NNS-Dev02/MiT/main/logo.png"
+$appsUrl   = "https://raw.githubusercontent.com/NNS-Dev02/MiT/main/apps.txt"
 
 # Tải logo nếu chưa có
 if (-not (Test-Path $imgPath)) {
