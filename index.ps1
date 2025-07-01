@@ -48,7 +48,6 @@ $listBox.Font = New-Object Drawing.Font("Segoe UI", 12)
 $menuItems.ForEach({ $listBox.Items.Add($_.Name) })
 $form.Controls.Add($listBox)
 
-# Khai báo biến cờ mặc định false
 $global:doInstall = $false
 
 $okButton = New-Object Windows.Forms.Button
@@ -87,6 +86,35 @@ if (-not $selectedItems -or $selectedItems.Count -eq 0) {
     exit
 }
 
+# Hàm kiểm tra và cài winget nếu chưa có
+function Install-WingetIfNeeded {
+    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+        Write-Host "Winget chưa có trên máy, sẽ tiến hành cài đặt..." -ForegroundColor Yellow
+
+        $wingetInstallerUrl = "https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle"
+        $tempFolder = "$env:TEMP\winget_install"
+        if (-not (Test-Path $tempFolder)) { New-Item $tempFolder -ItemType Directory | Out-Null }
+        $appInstallerPath = Join-Path $tempFolder "Microsoft.DesktopAppInstaller.appxbundle"
+
+        Write-Host "Đang tải App Installer..." -ForegroundColor Cyan
+        Invoke-WebRequest -Uri $wingetInstallerUrl -OutFile $appInstallerPath -UseBasicParsing
+
+        Write-Host "Đang cài đặt winget..." -ForegroundColor Cyan
+        try {
+            Add-AppxPackage -Path $appInstallerPath
+            Write-Host "Cài đặt winget thành công. Bạn có thể cần khởi động lại PowerShell." -ForegroundColor Green
+        } catch {
+            Write-Error "Lỗi khi cài winget: $_"
+            Write-Host "Bạn hãy cài winget thủ công theo https://aka.ms/getwinget"
+            exit
+        }
+    } else {
+        Write-Host "Winget đã được cài đặt." -ForegroundColor Green
+    }
+}
+
+Install-WingetIfNeeded
+
 foreach ($selName in $selectedItems) {
     $entry = $menuItems | Where-Object { $_.Name -eq $selName }
     $val = $entry.Value
@@ -101,8 +129,12 @@ foreach ($selName in $selectedItems) {
             Start-Process "https://drive.google.com/file/d/1dEfb8xFzNeLMhm5ji9W9n07zyc1WXRRG/view?usp=sharing"
         }
         default {
-            Write-Host "`nĐang cài đặt: $val" -ForegroundColor Green
-            winget install --id $val -e --accept-package-agreements --accept-source-agreements
+            if (Get-Command winget -ErrorAction SilentlyContinue) {
+                Write-Host "`nĐang cài đặt: $val" -ForegroundColor Green
+                winget install --id $val -e --accept-package-agreements --accept-source-agreements
+            } else {
+                Write-Warning "Không tìm thấy lệnh winget. Vui lòng cài đặt Windows Package Manager."
+            }
         }
     }
 }
