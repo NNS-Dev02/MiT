@@ -86,10 +86,16 @@ if (-not $selectedItems -or $selectedItems.Count -eq 0) {
     exit
 }
 
-# Hàm kiểm tra và cài winget nếu chưa có
 function Install-WingetIfNeeded {
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
         Write-Host "Winget chưa có trên máy, sẽ tiến hành cài đặt..." -ForegroundColor Yellow
+
+        $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole] "Administrator")
+        if (-not $isAdmin) {
+            Write-Warning "Bạn hãy mở PowerShell với quyền Quản trị (Run as Administrator) để cài đặt winget tự động."
+            Write-Warning "Hoặc cài winget thủ công theo https://aka.ms/getwinget"
+            return
+        }
 
         $wingetInstallerUrl = "https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle"
         $tempFolder = "$env:TEMP\winget_install"
@@ -97,16 +103,20 @@ function Install-WingetIfNeeded {
         $appInstallerPath = Join-Path $tempFolder "Microsoft.DesktopAppInstaller.appxbundle"
 
         Write-Host "Đang tải App Installer..." -ForegroundColor Cyan
-        Invoke-WebRequest -Uri $wingetInstallerUrl -OutFile $appInstallerPath -UseBasicParsing
+        try {
+            Invoke-WebRequest -Uri $wingetInstallerUrl -OutFile $appInstallerPath -UseBasicParsing
+        } catch {
+            Write-Warning "Không tải được bộ cài winget. Vui lòng kiểm tra kết nối mạng."
+            return
+        }
 
         Write-Host "Đang cài đặt winget..." -ForegroundColor Cyan
         try {
             Add-AppxPackage -Path $appInstallerPath
             Write-Host "Cài đặt winget thành công. Bạn có thể cần khởi động lại PowerShell." -ForegroundColor Green
         } catch {
-            Write-Error "Lỗi khi cài winget: $_"
-            Write-Host "Bạn hãy cài winget thủ công theo https://aka.ms/getwinget"
-            exit
+            Write-Warning "Lỗi khi cài winget: $_"
+            Write-Warning "Bạn hãy cài winget thủ công theo https://aka.ms/getwinget"
         }
     } else {
         Write-Host "Winget đã được cài đặt." -ForegroundColor Green
