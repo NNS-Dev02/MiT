@@ -5,10 +5,11 @@ Add-Type -AssemblyName System.Drawing
 $folder = "C:\MiT"
 if (-not (Test-Path $folder)) { New-Item -Path $folder -ItemType Directory | Out-Null }
 
-$imgPath   = Join-Path $folder "logo.png"
-$appsPath  = Join-Path $folder "apps.txt"
-$logoUrl   = "https://raw.githubusercontent.com/NNS-Dev02/MiT/main/logo.png"
-$appsUrl   = "https://raw.githubusercontent.com/NNS-Dev02/MiT/main/apps.txt"
+$imgPath  = Join-Path $folder "logo.png"
+$appsPath = Join-Path $folder "apps.txt"
+
+$logoUrl  = "https://raw.githubusercontent.com/NNS-Dev02/MiT/main/logo.png"
+$appsUrl  = "https://raw.githubusercontent.com/NNS-Dev02/MiT/main/apps.txt"
 
 # Tải logo nếu chưa có
 if (-not (Test-Path $imgPath)) {
@@ -17,9 +18,20 @@ if (-not (Test-Path $imgPath)) {
 
 # Tải apps.txt nếu chưa có
 if (-not (Test-Path $appsPath)) {
-    try { Invoke-WebRequest $appsUrl -OutFile $appsPath -UseBasicParsing } catch {
+    try {
+        Invoke-WebRequest $appsUrl -OutFile $appsPath -UseBasicParsing
+    } catch {
         [System.Windows.Forms.MessageBox]::Show("Không tải được file apps.txt.", "Lỗi", "OK", "Error")
         exit
+    }
+}
+
+# Đọc danh sách ứng dụng
+$appListRaw = Get-Content $appsPath -Raw
+$appList = $appListRaw -split "`n" | Where-Object { $_ -match "^\s*(.+?)\s*\|\s*(.+?)\s*$" }
+$menuItems = foreach ($line in $appList) {
+    if ($line -match "^\s*(.+?)\s*\|\s*(.+?)\s*$") {
+        [PSCustomObject]@{ Name = $matches[1].Trim(); Value = $matches[2].Trim() }
     }
 }
 
@@ -39,15 +51,6 @@ if (Test-Path $imgPath) {
 }
 $form.Controls.Add($pictureBox)
 
-# Đọc danh sách ứng dụng
-$appListRaw = Get-Content $appsPath -Raw
-$appList = $appListRaw -split "`n" | Where-Object { $_ -match "^\s*(.+?)\s*\|\s*(.+?)\s*$" }
-$menuItems = foreach ($line in $appList) {
-    if ($line -match "^\s*(.+?)\s*\|\s*(.+?)\s*$") {
-        [PSCustomObject]@{ Name = $matches[1].Trim(); Value = $matches[2].Trim() }
-    }
-}
-
 # Danh sách chọn
 $listBox = New-Object Windows.Forms.CheckedListBox
 $listBox.Size = New-Object Drawing.Size(560, 450)
@@ -56,12 +59,18 @@ $listBox.CheckOnClick = $true
 $menuItems.ForEach({ $listBox.Items.Add($_.Name) })
 $form.Controls.Add($listBox)
 
+# Biến để kiểm tra người dùng có bấm "Cài đặt" không
+$doInstall = $false
+
 # Nút "Cài đặt"
 $okButton = New-Object Windows.Forms.Button
 $okButton.Text = "Cài đặt"
 $okButton.Location = New-Object Drawing.Point(300, 650)
 $okButton.Size = New-Object Drawing.Size(80, 30)
-$okButton.Add_Click({ $form.Close() })
+$okButton.Add_Click({
+    $doInstall = $true
+    $form.Close()
+})
 $form.Controls.Add($okButton)
 
 # Nút "Thoát"
@@ -69,12 +78,21 @@ $cancelButton = New-Object Windows.Forms.Button
 $cancelButton.Text = "Thoát"
 $cancelButton.Location = New-Object Drawing.Point(390, 650)
 $cancelButton.Size = New-Object Drawing.Size(80, 30)
-$cancelButton.Add_Click({ $listBox.ClearSelected(); $form.Close() })
+$cancelButton.Add_Click({
+    $doInstall = $false
+    $form.Close()
+})
 $form.Controls.Add($cancelButton)
 
 # Hiển thị giao diện
 $form.Topmost = $true
 $form.ShowDialog()
+
+# Nếu người dùng bấm "Thoát" thì không làm gì
+if (-not $doInstall) {
+    Write-Host "Bạn đã chọn Thoát. Không thực hiện gì cả." -ForegroundColor Cyan
+    exit
+}
 
 # Xử lý sau khi chọn
 $selectedItems = $listBox.CheckedItems
