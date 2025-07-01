@@ -40,6 +40,7 @@ $form = New-Object Windows.Forms.Form
 $form.Text = "Công Ty TNHH Thương Mại Và Sản Xuất MiT"
 $form.Size = New-Object Drawing.Size(600, 750)
 $form.StartPosition = "CenterScreen"
+$form.Font = New-Object Drawing.Font("Segoe UI", 12)
 
 # Hiển thị hình ảnh
 $pictureBox = New-Object Windows.Forms.PictureBox
@@ -56,6 +57,7 @@ $listBox = New-Object Windows.Forms.CheckedListBox
 $listBox.Size = New-Object Drawing.Size(560, 450)
 $listBox.Location = New-Object Drawing.Point(10, 180)
 $listBox.CheckOnClick = $true
+$listBox.Font = New-Object Drawing.Font("Segoe UI", 12)
 $menuItems.ForEach({ $listBox.Items.Add($_.Name) })
 $form.Controls.Add($listBox)
 
@@ -67,6 +69,7 @@ $okButton = New-Object Windows.Forms.Button
 $okButton.Text = "Cài đặt"
 $okButton.Location = New-Object Drawing.Point(300, 650)
 $okButton.Size = New-Object Drawing.Size(80, 30)
+$okButton.Font = New-Object Drawing.Font("Segoe UI", 11)
 $okButton.Add_Click({
     $doInstall = $true
     $form.Close()
@@ -78,6 +81,7 @@ $cancelButton = New-Object Windows.Forms.Button
 $cancelButton.Text = "Thoát"
 $cancelButton.Location = New-Object Drawing.Point(390, 650)
 $cancelButton.Size = New-Object Drawing.Size(80, 30)
+$cancelButton.Font = New-Object Drawing.Font("Segoe UI", 11)
 $cancelButton.Add_Click({
     $doInstall = $false
     $form.Close()
