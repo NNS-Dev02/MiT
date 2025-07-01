@@ -1,0 +1,10 @@
+ 1. WinRAR | RARLab.WinRAR
+ 2. UniKey | UniKey.UniKey
+ 3. Chrome | Google.Chrome
+ 4. UltraViewer | DucFabulous.UltraViewer
+ 5. TeamViewer | TeamViewer.TeamViewer
+ 6. CPU-Z | CPUID.CPU-Z
+ 7. CoreTemp | ALCPU.CoreTemp
+ 8. CrystalDiskInfo | CrystalDewWorld.CrystalDiskInfo
+ 9. Microsoft Activation Scripts (MAS) | script
+10. Office 2019 2021 2024 | link
