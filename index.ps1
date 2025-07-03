@@ -14,7 +14,7 @@ if (-not (Test-Path $imgPath)) { try { Invoke-WebRequest $logoUrl -OutFile $imgP
 if (-not (Test-Path $appsPath)) {
     try { Invoke-WebRequest $appsUrl -OutFile $appsPath -UseBasicParsing }
     catch {
-        [System.Windows.Forms.MessageBox]::Show("Không tải được file apps.txt.", "Lỗi", "OK", "Error")
+        [System.Windows.Forms.MessageBox]::Show("Không tải được file apps.txt.", "Lỗi", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Error)
         exit
     }
 }
@@ -140,8 +140,16 @@ foreach ($selName in $selectedItems) {
         }
         default {
             if (Get-Command winget -ErrorAction SilentlyContinue) {
-                Write-Host "`nĐang cài đặt: $val" -ForegroundColor Green
-                winget install --id $val -e --accept-package-agreements --accept-source-agreements
+                # Kiểm tra app đã cài chưa
+                $installed = winget list --id $val 2>$null | Select-String $val
+
+                if ($installed) {
+                    [System.Windows.Forms.MessageBox]::Show("Ứng dụng '$selName' đã được cài trên máy.", "Thông báo", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+                    Write-Host "Ứng dụng '$selName' đã được cài trên máy." -ForegroundColor Yellow
+                } else {
+                    Write-Host "`nĐang cài đặt: $val" -ForegroundColor Green
+                    winget install --id $val -e --accept-package-agreements --accept-source-agreements
+                }
             } else {
                 Write-Warning "Không tìm thấy lệnh winget. Vui lòng cài đặt Windows Package Manager."
             }
