@@ -8,4 +8,4 @@
  8. CoreTemp | ALCPU.CoreTemp
  9. CrystalDiskInfo | CrystalDewWorld.CrystalDiskInfo
 10. Microsoft Activation Scripts (MAS) | script
-11. Office 2019 2021 2024 | link
+11. Chọn phiên bản Office | officeSuite
