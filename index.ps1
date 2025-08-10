@@ -125,181 +125,182 @@ function Show-SystemInfoForm {
     $dl = Join-Path $env:USERPROFILE "Downloads"
 
 # 1. Chạy ứng dụng Core Temp
-    $core = "C:\Program Files\Core Temp\Core Temp.exe"
-    $coreTempInstallDir = Split-Path $core
+$core = "C:\Program Files\Core Temp\Core Temp.exe"
+$coreTempInstallDir = Split-Path $core
 
-    if (Test-Path $core) {
-        Write-Host "----------------------------------------------------------------------------------------------------`n
-        ------------------------------Core Temp------------------------------"
+if (Test-Path $core) {
+    Write-Host "----------------------------------------------------------------------------------------------------`n------------------------------Core Temp------------------------------" -ForegroundColor DarkYellow
 
-        $tempCsvInDownloads = Join-Path $dl "temp.csv"
-        if (Test-Path $tempCsvInDownloads) {
-            Remove-Item $tempCsvInDownloads -ErrorAction SilentlyContinue
-            Write-Host "Xóa file temp.csv cũ trong thư mục Downloads."
-        }
-
-        Get-ChildItem -Path $coreTempInstallDir -Filter "CT-Log*.csv" -ErrorAction SilentlyContinue | ForEach-Object {
-            Remove-Item $_.FullName -ErrorAction SilentlyContinue
-            Write-Host "Xóa file log cũ: $($_.Name)"
-        }
-
-        $p = Start-Process $core -PassThru
-        Start-Sleep 5
-
-        if ($p -and -not $p.HasExited -and $p.MainWindowHandle -ne 0) {
-            Write-Host "Phát hiện cửa sổ Core Temp."
-            [Native.WinApi]::SetForegroundWindow($p.MainWindowHandle)
-            Start-Sleep 2
-
-            [System.Windows.Forms.SendKeys]::SendWait("{F4}")
-            Write-Host "Gửi phím F4 để bắt đầu ghi log, chờ 10 giây để thu thập dữ liệu..."
-            Start-Sleep 10
-
-            [System.Windows.Forms.SendKeys]::SendWait("{F4}")
-            Write-Host "Gửi phím F4 lần nữa để dừng ghi log."
-            Start-Sleep 2
-
-            Write-Host "Đóng ứng dụng Core Temp..."
-            $p.CloseMainWindow()
-            Start-Sleep 2
-            if (-not $p.HasExited) {
-                Stop-Process -Id $p.Id -Force
-                Write-Host "Core Temp chưa đóng, đã buộc tắt tiến trình."
-            }
-
-            $newestCoreTempCsv = $null
-            for ($i = 0; $i -lt 5; $i++) {
-                $newestCoreTempCsv = Get-ChildItem -Path $coreTempInstallDir -Filter "CT-Log*.csv" | 
-                                     Where-Object { $_.LastWriteTime -gt (Get-Date).AddSeconds(-15) } | 
-                                     Sort-Object LastWriteTime -Descending | Select-Object -First 1
-                if ($newestCoreTempCsv) { break }
-                Start-Sleep 1
-            }
-
-            if ($newestCoreTempCsv) {
-                Move-Item $newestCoreTempCsv.FullName $tempCsvInDownloads -Force
-                Write-Host "Tìm thấy file log của Core Temp: $($newestCoreTempCsv.Name)"
-                Write-Host "Di chuyển và đổi tên thành temp.csv trong thư mục Downloads."
-            } else {
-                Write-Host "Không tìm thấy file log CSV của Core Temp trong vòng 15 giây gần đây tại thư mục '$coreTempInstallDir'."
-                Write-Host "Vui lòng kiểm tra thủ công Core Temp để chắc chắn rằng nó đang ghi log bằng phím F4 và xác định vị trí lưu file log."
-            }
-
-        } else {
-            Write-Host "Không phát hiện được cửa sổ Core Temp hoặc chương trình đã đóng sớm."
-            Write-Host "Vui lòng đảm bảo rằng Core Temp đang chạy và không có cửa sổ/hộp thoại nào chặn lại."
-        }
-    } else {
-        Write-Host "Không tìm thấy file Core Temp.exe tại đường dẫn: $core"
+    $tempCsvInDownloads = Join-Path $dl "temp.csv"
+    if (Test-Path $tempCsvInDownloads) {
+        Remove-Item $tempCsvInDownloads -ErrorAction SilentlyContinue
+        Write-Host "Xóa file temp.csv cũ trong thư mục Downloads." -ForegroundColor DarkYellow
     }
 
+    Get-ChildItem -Path $coreTempInstallDir -Filter "CT-Log*.csv" -ErrorAction SilentlyContinue | ForEach-Object {
+        Remove-Item $_.FullName -ErrorAction SilentlyContinue
+        Write-Host "Xóa file log cũ: $($_.Name)" -ForegroundColor DarkYellow
+    }
+
+    $p = Start-Process $core -PassThru
+    Start-Sleep 5
+
+    if ($p -and -not $p.HasExited -and $p.MainWindowHandle -ne 0) {
+        Write-Host "Phát hiện cửa sổ Core Temp." -ForegroundColor DarkYellow
+        [Native.WinApi]::SetForegroundWindow($p.MainWindowHandle)
+        Start-Sleep 2
+
+        [System.Windows.Forms.SendKeys]::SendWait("{F4}")
+        Write-Host "Gửi phím F4 để bắt đầu ghi log, chờ 10 giây để thu thập dữ liệu..." -ForegroundColor DarkYellow
+        Start-Sleep 10
+
+        [System.Windows.Forms.SendKeys]::SendWait("{F4}")
+        Write-Host "Gửi phím F4 lần nữa để dừng ghi log." -ForegroundColor DarkYellow
+        Start-Sleep 2
+
+        Write-Host "Đóng ứng dụng Core Temp..." -ForegroundColor DarkYellow
+        $p.CloseMainWindow()
+        Start-Sleep 2
+        if (-not $p.HasExited) {
+            Stop-Process -Id $p.Id -Force
+            Write-Host "Core Temp chưa đóng, đã buộc tắt tiến trình." -ForegroundColor DarkYellow
+        }
+
+        $newestCoreTempCsv = $null
+        for ($i = 0; $i -lt 5; $i++) {
+            $newestCoreTempCsv = Get-ChildItem -Path $coreTempInstallDir -Filter "CT-Log*.csv" | 
+                                 Where-Object { $_.LastWriteTime -gt (Get-Date).AddSeconds(-15) } | 
+                                 Sort-Object LastWriteTime -Descending | Select-Object -First 1
+            if ($newestCoreTempCsv) { break }
+            Start-Sleep 1
+        }
+
+        if ($newestCoreTempCsv) {
+            Move-Item $newestCoreTempCsv.FullName $tempCsvInDownloads -Force
+            Write-Host "Tìm thấy file log của Core Temp: $($newestCoreTempCsv.Name)" -ForegroundColor DarkYellow
+            Write-Host "Di chuyển và đổi tên thành temp.csv trong thư mục Downloads." -ForegroundColor DarkYellow
+        } else {
+            Write-Host "Không tìm thấy file log CSV của Core Temp trong vòng 15 giây gần đây tại thư mục '$coreTempInstallDir'." -ForegroundColor DarkYellow
+            Write-Host "Vui lòng kiểm tra thủ công Core Temp để chắc chắn rằng nó đang ghi log bằng phím F4 và xác định vị trí lưu file log." -ForegroundColor DarkYellow
+        }
+
+    } else {
+        Write-Host "Không phát hiện được cửa sổ Core Temp hoặc chương trình đã đóng sớm." -ForegroundColor DarkYellow
+        Write-Host "Vui lòng đảm bảo rằng Core Temp đang chạy và không có cửa sổ/hộp thoại nào chặn lại." -ForegroundColor DarkYellow
+    }
+} else {
+    Write-Host "Không tìm thấy file Core Temp.exe tại đường dẫn: $core" -ForegroundColor DarkYellow
+}
+
+
 # 2. Chạy ứng dụng CPU-Z
-    $cpuZ = "C:\Program Files\CPUID\CPU-Z\cpuz.exe"
+$cpuZ = "C:\Program Files\CPUID\CPU-Z\cpuz.exe"
 
-    if (Test-Path $cpuZ) {
-        Write-Host "----------------------------------------------------------------------------------------------------`n
-        ------------------------------CPU-Z------------------------------"
+if (Test-Path $cpuZ) {
+    Write-Host "----------------------------------------------------------------------------------------------------`n
+    ------------------------------CPU-Z------------------------------" -ForegroundColor Magenta
 
-        & $cpuZ -txt=cpu
-        Start-Sleep 3
+    & $cpuZ -txt=cpu
+    Start-Sleep 3
 
-        $cpuLogPath = Join-Path (Split-Path $cpuZ) "cpu.txt"
-        $destCpuPath = Join-Path $dl "cpu.txt"
+    $cpuLogPath = Join-Path (Split-Path $cpuZ) "cpu.txt"
+    $destCpuPath = Join-Path $dl "cpu.txt"
 
-        if (Test-Path $destCpuPath) {
-            Remove-Item $destCpuPath -Force -ErrorAction SilentlyContinue
-            Write-Host "Đã xóa file cpu.txt cũ trong thư mục Downloads."
+    if (Test-Path $destCpuPath) {
+        Remove-Item $destCpuPath -Force -ErrorAction SilentlyContinue
+        Write-Host "Đã xóa file cpu.txt cũ trong thư mục Downloads." -ForegroundColor Magenta
+    }
+
+    if (Test-Path $cpuLogPath) {
+        try {
+            Move-Item $cpuLogPath $destCpuPath -Force -ErrorAction Stop
+            Write-Host "Di chuyển file cpu.txt vào thư mục Downloads." -ForegroundColor Magenta
+        } catch {
+            Write-Host "Đã xảy ra lỗi khi di chuyển cpu.txt: $($_.Exception.Message)" -ForegroundColor Magenta
         }
 
         if (Test-Path $cpuLogPath) {
-            try {
-                Move-Item $cpuLogPath $destCpuPath -Force -ErrorAction Stop
-                Write-Host "Di chuyển file cpu.txt vào thư mục Downloads."
-            } catch {
-                Write-Host "Đã xảy ra lỗi khi di chuyển cpu.txt: $($_.Exception.Message)"
-            }
-
-            if (Test-Path $cpuLogPath) {
-                Write-Host "File cpu.txt vẫn còn tồn tại tại thư mục gốc sau khi di chuyển (có thể lỗi)."
-            } else {
-                Write-Host "File cpu.txt đã được di chuyển thành công, không còn ở thư mục gốc."
-            }
-
-            if (Test-Path $destCpuPath) {
-                Write-Host "File cpu.txt đã tồn tại ở thư mục Downloads."
-            } else {
-                Write-Host "File cpu.txt KHÔNG tồn tại ở thư mục Downloads sau khi di chuyển."
-            }
-
+            Write-Host "File cpu.txt vẫn còn tồn tại tại thư mục gốc sau khi di chuyển (có thể lỗi)." -ForegroundColor Magenta
         } else {
-            Write-Host "Không tìm thấy file cpu.txt tại thư mục cài đặt CPU-Z sau khi thực thi."
-            Write-Host "Vui lòng kiểm tra thủ công hoặc đảm bảo CPU-Z được chạy với quyền ghi file."
+            Write-Host "File cpu.txt đã được di chuyển thành công, không còn ở thư mục gốc." -ForegroundColor Magenta
+        }
+
+        if (Test-Path $destCpuPath) {
+            Write-Host "File cpu.txt đã tồn tại ở thư mục Downloads." -ForegroundColor Magenta
+        } else {
+            Write-Host "File cpu.txt KHÔNG tồn tại ở thư mục Downloads sau khi di chuyển." -ForegroundColor Magenta
         }
 
     } else {
-        Write-Host "Không tìm thấy tệp thực thi CPU-Z tại đường dẫn: $cpuZ"
+        Write-Host "Không tìm thấy file cpu.txt tại thư mục cài đặt CPU-Z sau khi thực thi." -ForegroundColor Magenta
+        Write-Host "Vui lòng kiểm tra thủ công hoặc đảm bảo CPU-Z được chạy với quyền ghi file." -ForegroundColor Magenta
     }
+
+} else {
+    Write-Host "Không tìm thấy tệp thực thi CPU-Z tại đường dẫn: $cpuZ" -ForegroundColor Magenta
+}
+
 
 # 3. Chạy ứng dụng CrystalDiskInfo
-    $cd = "C:\Program Files\CrystalDiskInfo\DiskInfo64.exe"
-    $diskLogPath = Join-Path (Split-Path $cd) "DiskInfo.txt"
-    $destDiskPath = Join-Path $dl "disk.txt"
+$cd = "C:\Program Files\CrystalDiskInfo\DiskInfo64.exe"
+$diskLogPath = Join-Path (Split-Path $cd) "DiskInfo.txt"
+$destDiskPath = Join-Path $dl "disk.txt"
 
-    if (Test-Path $cd) {
-        Write-Host "----------------------------------------------------------------------------------------------------`n
-        ------------------------------CrystalDiskInfo------------------------------"
+if (Test-Path $cd) {
+    Write-Host "----------------------------------------------------------------------------------------------------`n------------------------------CrystalDiskInfo------------------------------" -ForegroundColor Blue
+
+    try {
+        Set-Clipboard -Value ""
+    } catch {
+        Write-Host "Không thể xóa nội dung clipboard: $($_.Exception.Message)" -ForegroundColor Blue
+    }
+
+    # Xóa log cũ nếu có
+    if (Test-Path $diskLogPath) {
+        Remove-Item $diskLogPath -Force -ErrorAction SilentlyContinue
+    }
+
+    # Xóa disk.txt trong Downloads nếu có
+    if (Test-Path $destDiskPath) {
+        Remove-Item $destDiskPath -Force -ErrorAction SilentlyContinue
+        Write-Host "Đã xóa file disk.txt cũ trong thư mục Downloads." -ForegroundColor Blue
+    }
+
+    # Gọi CrystalDiskInfo với /CopyExit để xuất log và tự thoát
+    & $cd /CopyExit
+
+    # Chờ đến khi DiskInfo.txt được tạo (tối đa 10 giây)
+    $maxWait = 10
+    $waited = 0
+    while (-not (Test-Path $diskLogPath) -and $waited -lt $maxWait) {
+        Start-Sleep -Seconds 1
+        $waited++
+    }
+
+    if (Test-Path $diskLogPath) {
+        Write-Host "Đã tìm thấy DiskInfo.txt tại thư mục gốc sau $waited giây." -ForegroundColor Blue
 
         try {
-            Set-Clipboard -Value ""
+            Move-Item $diskLogPath $destDiskPath -Force -ErrorAction Stop
+            Write-Host "Đã di chuyển và đổi tên file DiskInfo.txt thành disk.txt vào thư mục Downloads." -ForegroundColor Blue
         } catch {
-            Write-Host "Không thể xóa nội dung clipboard: $($_.Exception.Message)"
+            Write-Host "Lỗi khi di chuyển disk.txt: $($_.Exception.Message)" -ForegroundColor Blue
         }
 
-        # Xóa log cũ nếu có
-        if (Test-Path $diskLogPath) {
-            Remove-Item $diskLogPath -Force -ErrorAction SilentlyContinue
-        }
-
-        # Xóa disk.txt trong Downloads nếu có
         if (Test-Path $destDiskPath) {
-            Remove-Item $destDiskPath -Force -ErrorAction SilentlyContinue
-            Write-Host "Đã xóa file disk.txt cũ trong thư mục Downloads."
-        }
-
-        # Gọi CrystalDiskInfo với /CopyExit để xuất log và tự thoát
-        & $cd /CopyExit
-
-        # Chờ đến khi DiskInfo.txt được tạo (tối đa 10 giây)
-        $maxWait = 10
-        $waited = 0
-        while (-not (Test-Path $diskLogPath) -and $waited -lt $maxWait) {
-            Start-Sleep -Seconds 1
-            $waited++
-        }
-
-        if (Test-Path $diskLogPath) {
-            Write-Host "Đã tìm thấy DiskInfo.txt tại thư mục gốc sau $waited giây."
-
-            try {
-                Move-Item $diskLogPath $destDiskPath -Force -ErrorAction Stop
-                Write-Host "Đã di chuyển và đổi tên file DiskInfo.txt thành disk.txt vào thư mục Downloads."
-            } catch {
-                Write-Host "Lỗi khi di chuyển disk.txt: $($_.Exception.Message)"
-            }
-
-            if (Test-Path $destDiskPath) {
-                Write-Host "File disk.txt đã tồn tại tại thư mục Downloads."
-            } else {
-                Write-Host "File disk.txt KHÔNG tồn tại tại thư mục Downloads sau khi di chuyển."
-            }
+            Write-Host "File disk.txt đã tồn tại tại thư mục Downloads." -ForegroundColor Blue
         } else {
-            Write-Host "Không tìm thấy file DiskInfo.txt sau $maxWait giây. Có thể CrystalDiskInfo chưa kịp ghi log."
-            Write-Host "Thử tăng thời gian chờ hoặc chạy lại lần nữa nếu cần."
+            Write-Host "File disk.txt KHÔNG tồn tại tại thư mục Downloads sau khi di chuyển." -ForegroundColor Blue
         }
-
     } else {
-        Write-Host "Không tìm thấy ứng dụng CrystalDiskInfo tại đường dẫn: $cd"
+        Write-Host "Không tìm thấy file DiskInfo.txt sau $maxWait giây. Có thể CrystalDiskInfo chưa kịp ghi log." -ForegroundColor Blue
+        Write-Host "Thử tăng thời gian chờ hoặc chạy lại lần nữa nếu cần." -ForegroundColor Blue
     }
+
+} else {
+    Write-Host "Không tìm thấy ứng dụng CrystalDiskInfo tại đường dẫn: $cd" -ForegroundColor Blue
+}
+
 
 #------------------------------------------------------------------------------------------------------------------------
 
@@ -308,124 +309,126 @@ function Show-SystemInfoForm {
     $userName = $env:COMPUTERNAME
 
 # 1. Check CPU (Temperature)
-    function Get-CPUAvgTemp {
-        $f = Join-Path $dl "temp.csv"
-        if (-not (Test-Path $f)) {
-            Write-Host "File temp.csv không tìm thấy tại $f khi cố gắng đọc nhiệt độ."
-            return "N/A"
+function Get-CPUAvgTemp {
+    $f = Join-Path $dl "temp.csv"
+    if (-not (Test-Path $f)) {
+        Write-Host "File temp.csv không tìm thấy tại $f khi cố gắng đọc nhiệt độ." -ForegroundColor DarkYellow
+        return "N/A"
+    }
+
+    # Write-Host "Đang đọc nội dung file temp.csv (Core Temp log)..." -ForegroundColor DarkYellow
+    
+    try {
+        $fileContentRaw = Get-Content $f -Encoding UTF8 -Raw -ErrorAction Stop
+        $fileLines = $fileContentRaw.Split([Environment]::NewLine) | Where-Object { $_.Trim() -ne "" }
+    } catch {
+        Write-Host "Lỗi khi đọc file temp.csv: $($_.Exception.Message)" -ForegroundColor DarkYellow
+        return "N/A"
+    }
+
+    if ($fileLines.Count -lt 9) {
+        Write-Host "File temp.csv không đủ dòng để đọc nhiệt độ (cần ít nhất 9 dòng)." -ForegroundColor DarkYellow
+        Write-Host "Nội dung file:" -ForegroundColor DarkYellow
+        $fileLines | ForEach-Object { Write-Host "   $_" -ForegroundColor DarkYellow }
+        return "N/A"
+    }
+
+    $headerLine = $fileLines[6]
+    $dataLines = $fileLines[7..($fileLines.Count - 1)]
+
+    if ($dataLines.Count -gt 0) {
+        # Write-Host "Dòng dữ liệu đầu tiên được đọc: '$($dataLines[0])'" -ForegroundColor DarkYellow
+    } else {
+        Write-Host "Không có dòng dữ liệu nào sau header." -ForegroundColor DarkYellow
+        return "N/A"
+    }
+
+    $headers = $headerLine -split ','
+    $tempColumnIndices = @()
+
+    for ($i = 0; $i -lt $headers.Count; $i++) {
+        $trimmedHeader = $headers[$i].Trim()
+        if ($trimmedHeader -match '^Core \d+ Temp\.') {
+            $tempColumnIndices += $i
         }
+    }
 
-        Write-Host "Đang đọc nội dung file temp.csv (Core Temp log)..."
-        
-        try {
-            $fileContentRaw = Get-Content $f -Encoding UTF8 -Raw -ErrorAction Stop
-            $fileLines = $fileContentRaw.Split([Environment]::NewLine) | Where-Object { $_.Trim() -ne "" }
-        } catch {
-            Write-Host "Lỗi khi đọc file temp.csv: $($_.Exception.Message)"
-            return "N/A"
-        }
+    if ($tempColumnIndices.Count -eq 0) {
+        Write-Host "Không tìm thấy bất kỳ cột nhiệt độ nào ('Core X Temp.') trong header." -ForegroundColor DarkYellow
+        Write-Host "Header đầy đủ: '$headerLine'" -ForegroundColor DarkYellow
+        return "N/A"
+    }
 
-        if ($fileLines.Count -lt 9) {
-            Write-Host "File temp.csv không đủ dòng để đọc nhiệt độ (cần ít nhất 9 dòng)."
-            Write-Host "Nội dung file:"
-            $fileLines | ForEach-Object { Write-Host "   $_" }
-            return "N/A"
-        }
+    $temps = @()
+    $firstDataRowValues = ($dataLines[0] -split ',')
 
-        $headerLine = $fileLines[6]
-        $dataLines = $fileLines[7..($fileLines.Count - 1)]
-
-        if ($dataLines.Count -gt 0) {
-            Write-Host "Dòng dữ liệu đầu tiên được đọc: '$($dataLines[0])'"
-        } else {
-            Write-Host "Không có dòng dữ liệu nào sau header."
-            return "N/A"
-        }
-
-        $headers = $headerLine -split ','
-        $tempColumnIndices = @()
-
-        for ($i = 0; $i -lt $headers.Count; $i++) {
-            $trimmedHeader = $headers[$i].Trim()
-            if ($trimmedHeader -match '^Core \d+ Temp\.') {
-                $tempColumnIndices += $i
-            }
-        }
-
-        if ($tempColumnIndices.Count -eq 0) {
-            Write-Host "Không tìm thấy bất kỳ cột nhiệt độ nào ('Core X Temp.') trong header."
-            Write-Host "Header đầy đủ: '$headerLine'"
-            return "N/A"
-        }
-
-        $temps = @()
-        $firstDataRowValues = ($dataLines[0] -split ',')
-
-        foreach ($index in $tempColumnIndices) {
-            if ($index -lt $firstDataRowValues.Count) {
-                $val = $firstDataRowValues[$index].Trim()
-                if ($val -notmatch '^\s*$' -and $val -notmatch 'N/A' -and $val -notmatch '---') {
-                    try {
-                        $valToConvert = $val -replace '[^0-9\.-]', ''
-                        $temps += [double]$valToConvert
-                    } catch {
-                        Write-Host "Không thể chuyển đổi '$val' (từ cột '$($headers[$index])') thành số. Lỗi: $($_.Exception.Message)"
-                    }
+    foreach ($index in $tempColumnIndices) {
+        if ($index -lt $firstDataRowValues.Count) {
+            $val = $firstDataRowValues[$index].Trim()
+            if ($val -notmatch '^\s*$' -and $val -notmatch 'N/A' -and $val -notmatch '---') {
+                try {
+                    $valToConvert = $val -replace '[^0-9\.-]', ''
+                    $temps += [double]$valToConvert
+                } catch {
+                    Write-Host "Không thể chuyển đổi '$val' (từ cột '$($headers[$index])') thành số. Lỗi: $($_.Exception.Message)" -ForegroundColor DarkYellow
                 }
             }
         }
-
-        if ($temps.Count -eq 0) {
-            Write-Host "Không tìm thấy dữ liệu nhiệt độ hợp lệ từ các cột Core X Temp trong dòng dữ liệu đầu tiên."
-            return "N/A"
-        }
-
-        return ([math]::Round(($temps | Measure-Object -Average).Average, 1)).ToString() + "°C"
     }
 
-    $cpuTemp = Get-CPUAvgTemp
+    if ($temps.Count -eq 0) {
+        Write-Host "Không tìm thấy dữ liệu nhiệt độ hợp lệ từ các cột Core X Temp trong dòng dữ liệu đầu tiên." -ForegroundColor DarkYellow
+        return "N/A"
+    }
+
+    return ([math]::Round(($temps | Measure-Object -Average).Average, 1)).ToString() + "°C"
+}
+
+$cpuTemp = Get-CPUAvgTemp
+
 
 # 2–3. Check Mainboard : - Check RAM (DDR? & Bus?)
-    $cpuLog = Join-Path $dl "cpu.txt"
-    if (Test-Path $cpuLog) {
-        $c = Get-Content $cpuLog -Encoding UTF8
+$cpuLog = Join-Path $dl "cpu.txt"
+if (Test-Path $cpuLog) {
+    $c = Get-Content $cpuLog -Encoding UTF8
 
-        $startIndex = ($c | Select-String '^DMI Baseboard').LineNumber
-        if ($startIndex) {
-            $block = $c[$startIndex..($startIndex + 10)]
+    $startIndex = ($c | Select-String '^DMI Baseboard').LineNumber
+    if ($startIndex) {
+        $block = $c[$startIndex..($startIndex + 10)]
 
-            $vendor = ($block | Where-Object { $_ -match '^\s*vendor\s+' }) -replace '^\s*vendor\s+', ''
-            $model  = ($block | Where-Object { $_ -match '^\s*model\s+' })  -replace '^\s*model\s+', ''
+        $vendor = ($block | Where-Object { $_ -match '^\s*vendor\s+' }) -replace '^\s*vendor\s+', ''
+        $model  = ($block | Where-Object { $_ -match '^\s*model\s+' })  -replace '^\s*model\s+', ''
 
-            if ($vendor -and $model) {
-                $mainboard = "$vendor - $model"
-            } else {
-                $mainboard = "Không rõ"
-            }
+        if ($vendor -and $model) {
+            $mainboard = "$vendor - $model"
         } else {
             $mainboard = "Không rõ"
         }
+    } else {
+        $mainboard = "Không rõ"
+    }
 
-        # RAM
-        $ramSize = ($c | Where-Object { $_ -match '^Memory Size\s+' }) -replace '^.*?\t+', ''
-        $ramType = ($c | Where-Object { $_ -match '^Memory Type\s+' }) -replace '^.*?\t+', ''
-        $ramBus  = ($c | Where-Object { $_ -match '^Memory Frequency\s+' }) -replace '^.*?\t+', ''
-        
-        if ($ramBus -match '([\d.]+)\s*MHz') {
-            try {
-                $actualBusSpeed = [double]$matches[1]
-                $effectiveSpeed = $actualBusSpeed * 2
-                $ramBus = "Bus $([int][math]::Round($effectiveSpeed))"
-            } catch {
-                $ramBus = "N/A (Lỗi định dạng bus RAM)"
-                Write-Host "Lỗi khi tính toán tốc độ bus hiệu dụng: $($_.Exception.Message)"
-            }
-        } else {
-            $ramBus = "N/A (Không tìm thấy tần số bus RAM)"
+    # RAM
+    $ramSize = ($c | Where-Object { $_ -match '^Memory Size\s+' }) -replace '^.*?\t+', ''
+    $ramType = ($c | Where-Object { $_ -match '^Memory Type\s+' }) -replace '^.*?\t+', ''
+    $ramBus  = ($c | Where-Object { $_ -match '^Memory Frequency\s+' }) -replace '^.*?\t+', ''
+    
+    if ($ramBus -match '([\d.]+)\s*MHz') {
+        try {
+            $actualBusSpeed = [double]$matches[1]
+            $effectiveSpeed = $actualBusSpeed * 2
+            $ramBus = "Bus $([int][math]::Round($effectiveSpeed))"
+        } catch {
+            $ramBus = "N/A (Lỗi định dạng bus RAM)"
+            Write-Host "Lỗi khi tính toán tốc độ bus hiệu dụng: $($_.Exception.Message)" -ForegroundColor Magenta
         }
     } else {
-        $mainboard = $ramSize = $ramType = $ramBus = "N/A"
+        $ramBus = "N/A (Không tìm thấy tần số bus RAM)"
     }
+} else {
+    $mainboard = $ramSize = $ramType = $ramBus = "N/A"
+}
+
 
 
 # 4. HardDisk Total Space (SSD/HDD):
@@ -478,29 +481,35 @@ function Show-SystemInfoForm {
     $freeStr = "`r`n" + $freeStr
 
 # 6. Check HardDisk Life :
-    $diskHealth = ""
-    if (Test-Path $diskLog) {
-        try {
-            $d = Get-Content $diskLog -Encoding UTF8
-            $healthLines = @()
+$diskHealth = ""
+if (Test-Path $diskLog) {
+    try {
+        $d = Get-Content $diskLog -Encoding UTF8
+        $healthLines = @()
 
-            foreach ($line in $d) {
-                if ($line -match '^\s*Health Status\s*:\s*(.+)$') {
-                    $healthLines += $matches[1].Trim()
-                }
+        foreach ($line in $d) {
+            if ($line -match '^\s*Health Status\s*:\s*(.+)$') {
+                $healthLines += $matches[1].Trim()
             }
-
-            if ($healthLines.Count -gt 0) {
-                $diskHealth = "`r`n" + ($healthLines -join "`r`n")
-            } else {
-                $diskHealth = "`r`nKhông rõ"
-            }
-        } catch {
-            $diskHealth = "`r`nLỗi đọc file"
         }
-    } else {
-        $diskHealth = "`r`nN/A"
+
+        if ($healthLines.Count -gt 0) {
+            $diskHealth = "`r`n" + ($healthLines -join "`r`n")
+            # Write-Host "Tình trạng ổ đĩa:" -ForegroundColor Blue
+            # Write-Host $diskHealth -ForegroundColor Blue
+        } else {
+            $diskHealth = "`r`nKhông rõ"
+            Write-Host "Tình trạng ổ đĩa: Không rõ" -ForegroundColor Blue
+        }
+    } catch {
+        $diskHealth = "`r`nLỗi đọc file"
+        Write-Host "Lỗi khi đọc tình trạng ổ đĩa" -ForegroundColor Blue
     }
+} else {
+    $diskHealth = "`r`nN/A"
+    Write-Host "Không tìm thấy file log tình trạng ổ đĩa" -ForegroundColor Blue
+}
+
 
 # 7. Check Battery Life Laptop :
     $filePath = Join-Path $dl "battery-report.html"
@@ -589,21 +598,27 @@ function Bring-WindowToFront($processName) {
     return $false
 }
 
-function Close-OutlookFirstRun {
-    if (Bring-WindowToFront "OUTLOOK") {
-        Start-Sleep -Milliseconds 500
+function Close-OutlookPopup {
+    param(
+        [string]$titlePattern
+    )
 
-        # Gửi ENTER để xác nhận cửa sổ đầu tiên
-        [System.Windows.Forms.SendKeys]::SendWait("{ENTER}")
-        Start-Sleep -Seconds 2
+    $popup = Get-Process outlook -ErrorAction SilentlyContinue | Where-Object {
+        $_.MainWindowTitle -match $titlePattern
+    } | Select-Object -First 1
 
-        # Gửi ALT + F4 để đóng cửa sổ còn lại (nếu có)
+    if ($popup) {
+        [WinAPI]::SetForegroundWindow($popup.MainWindowHandle) | Out-Null
+        Start-Sleep -Milliseconds 200
         [System.Windows.Forms.SendKeys]::SendWait("%{F4}")
+        return $true
     }
-    else {
-        Write-Host "Không tìm thấy cửa sổ Outlook"
-    }
+    return $false
 }
+
+# Ví dụ dùng:
+Close-OutlookPopup "New Profile"
+Close-OutlookPopup "Welcome to Outlook"
 
 function Format-SizeGB ($bytes) {
     return [math]::Round($bytes / 1GB, 2)
@@ -842,10 +857,10 @@ $txt.Text = @"
 #------------------------------------------------------------------------------------------------------------------------------------
 # 1. Biến $officeLinks
 $officeLinks = @{
-    "Office 2019" = "https://github.com/NNS-Dev02/MiT/releases/download/v1.0/Office2019.rar"
-    "Office 2021" = "https://github.com/NNS-Dev02/MiT/releases/download/v1.0/Office2021.rar"
-    "Office 2024" = "https://github.com/NNS-Dev02/MiT/releases/download/v1.0/Office2024.rar"
-    "Office 365"  = "https://github.com/NNS-Dev02/MiT/releases/download/v1.0/Office365.rar"
+    "Office 2019" = "https://github.com/NNS-Dev02/MiT/releases/download/v1.0/Office.2019.zip"
+    "Office 2021" = "https://github.com/NNS-Dev02/MiT/releases/download/v1.0/Office.2021.zip"
+    "Office 2024" = "https://github.com/NNS-Dev02/MiT/releases/download/v1.0/Office.2024.zip"
+    "Office 365"  = "https://github.com/NNS-Dev02/MiT/releases/download/v1.0/Office.365.zip"
 }
 # 2. Hàm chọn phiên bản Office
 function Show-OfficeSuiteForm {
@@ -1079,22 +1094,37 @@ function Install-SelectedApplications {
                 }
             }
             default {
-                # Xử lý app thông thường qua URL
-                $downloadUrl = $val
-                $fileName = Split-Path $downloadUrl -Leaf
-                $outPath = Join-Path $folder $fileName
+            # Xử lý app thông thường qua URL
+            $downloadUrl = $val
+            $fileName = Split-Path $downloadUrl -Leaf
+            $outPath = Join-Path $folder $fileName
 
-                if (Test-Path $outPath) {
-                    $reDownload = [Windows.Forms.MessageBox]::Show("Tệp '$fileName' đã tồn tại. Bạn có muốn tải lại không?", "Tệp đã tồn tại", [Windows.Forms.MessageBoxButtons]::YesNo, [Windows.Forms.MessageBoxIcon]::Question)
-                    if ($reDownload -eq "Yes") {
-                        Download-WithLoading -Url $downloadUrl -OutFile $outPath -Message "Đang tải $fileName..."
-                    }
-                } else {
+            # Kiểm tra nếu file đã tồn tại
+            if (Test-Path $outPath) {
+                $reDownload = [Windows.Forms.MessageBox]::Show(
+                    "Tệp '$fileName' đã tồn tại. Bạn có muốn tải lại không?", 
+                    "Tệp đã tồn tại", 
+                    [Windows.Forms.MessageBoxButtons]::YesNo, 
+                    [Windows.Forms.MessageBoxIcon]::Question
+                )
+
+                if ($reDownload -eq [Windows.Forms.DialogResult]::Yes) {
                     Download-WithLoading -Url $downloadUrl -OutFile $outPath -Message "Đang tải $fileName..."
                 }
+                elseif ($reDownload -eq [Windows.Forms.DialogResult]::No) {
+                    # Bỏ qua ứng dụng này
+                    continue
+                }
+            }
+            else {
+                Download-WithLoading -Url $downloadUrl -OutFile $outPath -Message "Đang tải $fileName..."
+            }
 
+            # Chỉ cài nếu file tồn tại (nghĩa là không bấm No)
+            if (Test-Path $outPath) {
                 Start-Process $outPath
             }
+        }
         }
     }
 }
