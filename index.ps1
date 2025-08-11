@@ -791,27 +791,31 @@ catch {
     $txt.Font = New-Object Drawing.Font("Segoe UI",11)
     $txt.Size = New-Object Drawing.Size(520,540)
     $txt.Location = New-Object Drawing.Point(10,10)
+    $txt.Font = New-Object Drawing.Font("Consolas", 11)  # font đều khoảng cách
 
 $txt.Text = @"
-    Check Tasks/User : $userName
+Check Tasks/User : $userName
 
- 1. Check CPU (Temperature) : Nhiệt độ trung bình $cpuTemp
+1. Check CPU (Temperature) : Nhiệt độ trung bình $cpuTemp
 
- 2. Check Mainboard : $mainboard
+2. Check Mainboard : $mainboard
 
- 3. Check RAM (DDR? & Bus?) : $ramSize, $ramType, $ramBus
+3. Check RAM (DDR? & Bus?) : $ramSize, $ramType, $ramBus
 
- 4. HardDisk Total Space (SSD/HDD):$diskInfo
+4. HardDisk Total Space (SSD/HDD):
+$diskInfo
 
- 5. HardDisk Free Space (SSD/HDD):$freeStr
+5. HardDisk Free Space (SSD/HDD):
+$freeStr
 
- 6. Check HardDisk Life :$diskHealth
+6. Check HardDisk Life:
+$diskHealth
 
- 7. Check Battery Life Laptop : $batteryLife
+7. Check Battery Life Laptop : $batteryLife
 
- 8. Check Noisy : Bình thường
+8. Check Noisy : Bình thường
 
- 9. Check Network Connection : $CheckNetwork
+9. Check Network Connection : $CheckNetwork
 
 10. Check Date & Time : $checkTime
 
