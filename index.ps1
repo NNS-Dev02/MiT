@@ -818,10 +818,10 @@ Check Tasks/User : $userName`r`n
 3. Check RAM (DDR? & Bus?) : $ramSize, $ramType, $ramBus`r`n
 
 4. HardDisk Total Space (SSD/HDD):
-$diskInfo`r`n
+$diskInfo
 
 5. HardDisk Free Space (SSD/HDD):
-$freeStr`r`n
+$freeStr
 
 6. Check HardDisk Life:
 $diskHealth
