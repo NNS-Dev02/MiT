@@ -809,19 +809,19 @@ $scanResult   = "$scanResult`r`n"
 $antivirusStatus = "$antivirusStatus`r`n"
 
 $txt.Text = @"
-Check Tasks/User : $userName
+Check Tasks/User : $userName`r`n
 
-1. Check CPU (Temperature) : Nhiệt độ trung bình $cpuTemp
+1. Check CPU (Temperature) : Nhiệt độ trung bình $cpuTemp`r`n
 
-2. Check Mainboard : $mainboard
+2. Check Mainboard : $mainboard`r`n
 
-3. Check RAM (DDR? & Bus?) : $ramSize, $ramType, $ramBus
+3. Check RAM (DDR? & Bus?) : $ramSize, $ramType, $ramBus`r`n
 
 4. HardDisk Total Space (SSD/HDD):
-$diskInfo
+$diskInfo`r`n
 
 5. HardDisk Free Space (SSD/HDD):
-$freeStr
+$freeStr`r`n
 
 6. Check HardDisk Life:
 $diskHealth
