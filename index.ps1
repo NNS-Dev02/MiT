@@ -793,6 +793,21 @@ catch {
     $txt.Location = New-Object Drawing.Point(10,10)
     $txt.Font = New-Object Drawing.Font("Consolas", 11)  # font đều khoảng cách
 
+# Chuẩn hóa giá trị biến để luôn xuống dòng
+$diskInfo     = "$diskInfo`r`n"
+$freeStr      = "$freeStr`r`n"
+$diskHealth   = "$diskHealth`r`n"
+$batteryLife  = "$batteryLife`r`n"
+$CheckNetwork = "$CheckNetwork`r`n"
+$checkTime    = "$checkTime`r`n"
+$officeStatus = "$officeStatus`r`n"
+$outlookSizeStatus = "$outlookSizeStatus`r`n"
+$fileShareStatus   = "$fileShareStatus`r`n"
+$updateStatus = "$updateStatus`r`n"
+$cleanupStatus = "$cleanupStatus`r`n"
+$scanResult   = "$scanResult`r`n"
+$antivirusStatus = "$antivirusStatus`r`n"
+
 $txt.Text = @"
 Check Tasks/User : $userName
 
