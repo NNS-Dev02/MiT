@@ -828,7 +828,7 @@ $diskHealth
 
 7. Check Battery Life Laptop : $batteryLife
 
-8. Check Noisy : Bình thường
+8. Check Noisy : Bình thường`r`n
 
 9. Check Network Connection : $CheckNetwork
 
@@ -840,11 +840,11 @@ $diskHealth
 
 13. Check file Server/Nas/Onedrive : $fileShareStatus
 
-14. Check Task Manager : CPU = $cpuUsage% | RAM = $ramUsage%
+14. Check Task Manager : CPU = $cpuUsage% | RAM = $ramUsage%`r`n
 
 15. Check Windows Update : $updateStatus
 
-16. Backup data : Chưa thực hiện
+16. Backup data : Chưa thực hiện`r`n
 
 17. Clean up the computer : $cleanupStatus
 
