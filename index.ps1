@@ -1039,7 +1039,7 @@ function Show-appCrackSuiteForm {
     )
 
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = "Chọn ứng dụng App Crack"
+    $form.Text = "Chọn Ứng dụng Crack"
     $form.Size = New-Object System.Drawing.Size(350, 250)
     $form.StartPosition = "CenterScreen"
     $form.FormBorderStyle = "FixedDialog"
