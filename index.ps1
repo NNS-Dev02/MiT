@@ -1,4 +1,4 @@
-# Bật Visual Styles cho WinForms
+﻿# Bật Visual Styles cho WinForms
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
     [Windows.Forms.Application]::EnableVisualStyles()
@@ -9,6 +9,21 @@ if (-not ([System.Type]::GetType("Native.WinApi"))) {
         [DllImport("user32.dll")]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
 "@ -Name WinApi -Namespace Native
+}
+
+
+# Yêu cầu nhập mật khẩu
+$securePassword = Read-Host "Nhập mật khẩu để tiếp tục" -AsSecureString
+$plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+    [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+)
+
+# Mật khẩu đúng (ví dụ: "mit2025")
+$correctPassword = "mitgroup2025"
+
+if ($plainPassword -ne $correctPassword) {
+    Write-Host "Sai mật khẩu. Không thể tiếp tục." -ForegroundColor Red
+    exit
 }
 
 
