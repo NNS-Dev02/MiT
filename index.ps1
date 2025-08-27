@@ -11,7 +11,6 @@ if (-not ([System.Type]::GetType("Native.WinApi"))) {
 "@ -Name WinApi -Namespace Native
 }
 
-
 # Yêu cầu nhập mật khẩu
 $securePassword = Read-Host "Nhập mật khẩu để tiếp tục" -AsSecureString
 $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
@@ -1021,6 +1020,145 @@ function Download-WithLoading {
 
 
 
+
+#------------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------- Hàm map link Google Drive để tải App Crack --------------------------------------------------
+#------------------------------------------------------------------------------------------------------------------------------------
+
+# 1. Biến $appCrack
+$appCrack = @{
+    "Adobe Acrobat Pro" = "https://drive.google.com/uc?export=download&id=1cYVs3Jnw5S9WsBNau3BRie7XaEDPZMhN"
+    "AutoCAD 2022"       = "https://drive.google.com/uc?export=download&id=1xODjUqtQN4f9SY4U30Ff-ghsrSIeDb34"
+}
+
+# 2. Hàm chọn ứng dụng App Crack
+function Show-appCrackSuiteForm {
+    param(
+        [Parameter(Mandatory = $true)]
+        [Hashtable]$Links
+    )
+
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = "Chọn ứng dụng App Crack"
+    $form.Size = New-Object System.Drawing.Size(350, 250)
+    $form.StartPosition = "CenterScreen"
+    $form.FormBorderStyle = "FixedDialog"
+    $form.MinimizeBox = $false
+    $form.MaximizeBox = $false
+    $form.ControlBox = $false
+    $form.Topmost = $true
+
+    $checkedListBox = New-Object System.Windows.Forms.CheckedListBox
+    $checkedListBox.Location = New-Object System.Drawing.Point(20, 20)
+    $checkedListBox.Size = New-Object System.Drawing.Size(300, 140)
+    $checkedListBox.CheckOnClick = $true
+    $checkedListBox.Font = New-Object System.Drawing.Font("Segoe UI", 10)
+
+    foreach ($key in $Links.Keys | Sort-Object) {
+        $checkedListBox.Items.Add($key)
+    }
+    $form.Controls.Add($checkedListBox)
+
+    $btnOk = New-Object System.Windows.Forms.Button
+    $btnOk.Text = "OK"
+    $btnOk.Location = New-Object System.Drawing.Point(120, 170)
+    $btnOk.Size = New-Object System.Drawing.Size(100, 30)
+    $btnOk.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $form.Controls.Add($btnOk)
+
+    $result = $form.ShowDialog()
+
+    if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+        $checkedItems = @()
+        foreach ($item in $checkedListBox.CheckedItems) {
+            $checkedItems += $item
+        }
+        return $checkedItems
+    } else {
+        return @()
+    }
+}
+
+# 3. Xử lý tải và giải nén App Crack
+switch ($action) {
+    "appCrackSuite" {
+        $chs = Show-appCrackSuiteForm -Links $appCrack
+        foreach ($v in $chs) {
+            $url = $appCrack[$v]
+            $fileName = "$v.rar"  # hoặc .zip nếu bạn dùng định dạng zip
+            $outPath = Join-Path "C:\MiT" $fileName
+
+            # Tải về file
+            Download-WithLoading -Url $url -OutFile $outPath -Message "Đang tải $v..."
+
+            # Nếu là .zip thì giải nén
+            if ($outPath -like "*.zip") {
+                $extractPath = Join-Path "C:\MiT" ($v -replace '\s','')
+                if (-not (Test-Path $extractPath)) {
+                    New-Item -ItemType Directory -Path $extractPath | Out-Null
+                }
+
+                try {
+                    Expand-Archive -Path $outPath -DestinationPath $extractPath -Force
+                    Start-Process "$extractPath"
+                } catch {
+                    [System.Windows.Forms.MessageBox]::Show("Giải nén thất bại: $_","Lỗi",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
+                }
+            } else {
+                Start-Process $outPath
+            }
+        }
+    }
+
+    default {
+        Write-Host "Hành động không xác định: $action"
+    }
+}
+
+# 4. Hàm Download-WithLoading
+function Download-WithLoading {
+    param (
+        [string]$Url,
+        [string]$OutFile,
+        [string]$Message = "Đang tải..."
+    )
+
+    $form = New-Object Windows.Forms.Form
+    $form.Text = "Đang tải"
+    $form.Size = New-Object Drawing.Size(400, 100)
+    $form.StartPosition = "CenterScreen"
+    $form.FormBorderStyle = "FixedDialog"
+    $form.ControlBox = $false
+    $form.Topmost = $true
+
+    $label = New-Object Windows.Forms.Label
+    $label.Text = $Message
+    $label.Dock = "Fill"
+    $label.TextAlign = "MiddleCenter"
+    $label.Font = New-Object Drawing.Font("Segoe UI", 10)
+    $form.Controls.Add($label)
+
+    $job = Start-Job {
+        param($u, $o)
+        Invoke-WebRequest -Uri $u -OutFile $o -UseBasicParsing
+    } -ArgumentList $Url, $OutFile
+
+    while ($job.State -eq "Running") {
+        $form.Refresh()
+        Start-Sleep -Milliseconds 500
+        [System.Windows.Forms.Application]::DoEvents()
+    }
+
+    $form.Close()
+    Receive-Job $job | Out-Null
+    Remove-Job $job
+}
+
+
+
+
+
+
 #------------------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------Hàm map link Github tải Ứng dụng--------------------------------------------------
 #------------------------------------------------------------------------------------------------------------------------------------
@@ -1062,6 +1200,12 @@ function Install-SelectedApplications {
             "officeSuite" {
                 $chs = Show-OfficeSuiteForm -Links $officeLinks 
                 foreach ($v in $chs) { Start-Process $officeLinks[$v] }
+            }
+            "appCrackSuite" {
+                $chs = Show-appCrackSuiteForm -Links $appCrack
+                foreach ($v in $chs) {
+                    Start-Process $appCrack[$v]
+                }
             }
             "maintenance" {
                 $confirmationForm = New-Object System.Windows.Forms.Form
