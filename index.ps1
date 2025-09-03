@@ -1314,67 +1314,197 @@ function Install-SelectedApplications {
 #--------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------Form Chính--------------------------------------------------
 #--------------------------------------------------------------------------------------------------------------
-# 1. Tạo form chính
-    $form = New-Object Windows.Forms.Form
-    $form.Text           = "Công Ty TNHH Thương Mại Và Sản Xuất MiT"
-    $form.Size           = New-Object Drawing.Size(600,650)
-    $form.StartPosition = "CenterScreen"
-    $form.Font           = New-Object Drawing.Font("Segoe UI",12)
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
 
-# 2. Logo và Apps.txt
-    $pic = New-Object Windows.Forms.PictureBox
-    $pic.Size     = New-Object Drawing.Size(200,150)
-    $pic.SizeMode = "StretchImage"
-    $pic.Location = New-Object Drawing.Point(([int](($form.ClientSize.Width-200)/2)),10)
+# =========================
+# Biến toàn cục lưu panel
+# =========================
+$global:AppPanels = @()
 
-    $folder   = "C:\MiT"
-    $imgUrl   = "https://raw.githubusercontent.com/NNS-Dev02/MiT/main/logo.png"
-    $appsUrl  = "https://raw.githubusercontent.com/NNS-Dev02/MiT/main/apps.txt"
-    $imgPath  = Join-Path $folder "logo.png"
+# =========================
+# Hàm tạo card ứng dụng
+# =========================
+function New-AppCard($app, $x, $y, $form) {
+    # Panel chính
+    $panel = New-Object System.Windows.Forms.Panel
+    $panel.Size = New-Object System.Drawing.Size(120,130)
+    $panel.Location = New-Object System.Drawing.Point($x,$y)
+    $panel.BackColor = [System.Drawing.Color]::White
+    $panel.BorderStyle = "FixedSingle"
+    $panel.Cursor = [System.Windows.Forms.Cursors]::Hand
 
-    if (-not (Test-Path $folder)) { New-Item $folder -ItemType Directory | Out-Null }
-    if (-not (Test-Path $imgPath)) { Download-WithLoading -Url $imgUrl -OutFile $imgPath -Message "Đang tải logo..." }
+    $panel.Tag = @{App=$app; Selected=$false}
 
-    if (Test-Path $imgPath) {
-        try { $pic.Image = [Drawing.Image]::FromFile($imgPath) } catch {}
+    # Icon
+    $pic = New-Object System.Windows.Forms.PictureBox
+    $pic.Size = New-Object System.Drawing.Size(64,64)
+    $pic.Location = New-Object System.Drawing.Point(28,15)
+    $pic.SizeMode = "Zoom"
+    if ($app.Icon -and (Test-Path $app.Icon)) {
+        $pic.Image = [System.Drawing.Image]::FromFile($app.Icon)
     }
-    $form.Controls.Add($pic)
+    $panel.Controls.Add($pic)
 
-# 3. CheckedListBox ứng dụng
-    $listBox = New-Object Windows.Forms.CheckedListBox
-    $listBox.Size          = New-Object Drawing.Size(560,350)
-    $listBox.Location      = New-Object Drawing.Point(10,180)
-    $listBox.CheckOnClick  = $true
-    $listBox.Font          = New-Object Drawing.Font("Segoe UI",13)
+    # Label
+    $lbl = New-Object System.Windows.Forms.Label
+    $lbl.Text = $app.Name
+    $lbl.Font = New-Object System.Drawing.Font("Segoe UI",9,[System.Drawing.FontStyle]::Bold)
+    $lbl.ForeColor = [System.Drawing.Color]::FromArgb(40,40,40)
+    $lbl.TextAlign = "MiddleCenter"
+    $lbl.Dock = "Bottom"
+    $lbl.Height = 30
+    $panel.Controls.Add($lbl)
 
-    $appsPath = Join-Path $folder "apps.txt"
-    if (-not (Test-Path $appsPath)) { Download-WithLoading -Url $appsUrl -OutFile $appsPath -Message "Đang tải apps.txt..." }
-    $appLines = Get-Content $appsPath | Where-Object { $_ -match "\|" }
-    $menuItems = foreach ($l in $appLines) {
-        if ($l -match "^\s*(.+?)\s*\|\s*(.+?)\s*$") {
-            [PSCustomObject]@{ Name = $matches[1].Trim(); Value = $matches[2].Trim() }
+    # Hover effect
+    $panel.Add_MouseEnter({
+        if (-not $this.Tag.Selected) {
+            $this.BackColor = [System.Drawing.Color]::FromArgb(245,250,255)
+            $this.BorderStyle = "Fixed3D"
+        }
+    })
+    $panel.Add_MouseLeave({
+        if (-not $this.Tag.Selected) {
+            $this.BackColor = [System.Drawing.Color]::White
+            $this.BorderStyle = "FixedSingle"
+        }
+    })
+
+    # Click effect
+    $panel.Add_Click({
+        if (-not $this.Tag.Selected) {
+            $this.BackColor = [System.Drawing.Color]::FromArgb(220,240,255)
+            $this.BorderStyle = "Fixed3D"
+            $this.Tag.Selected = $true
+        }
+        else {
+            $this.BackColor = [System.Drawing.Color]::White
+            $this.BorderStyle = "FixedSingle"
+            $this.Tag.Selected = $false
+        }
+    })
+
+    $form.Controls.Add($panel)
+    $global:AppPanels += $panel
+}
+
+# =========================
+# Đọc file apps.txt
+# =========================
+$apps = @()
+$iconFolder = "C:\MiT\icons"
+
+Get-Content "C:\MiT\apps.txt" | ForEach-Object {
+    if ($_ -match "^\s*(.+?)\s*\|\s*(.+)$") {
+        $name = $matches[1].Trim()
+        $url  = $matches[2].Trim()
+
+        # Đường dẫn icon: cố định = tên + .png (ví dụ: Chrome.png)
+        $iconPath = Join-Path $iconFolder ("$name.png")
+
+        $apps += @{
+            Name = $name
+            Url  = $url
+            Icon = $iconPath
         }
     }
-    $menuItems.ForEach({ $listBox.Items.Add($_.Name) })
-    $form.Controls.Add($listBox)
+}
 
-# 4. Nút Cài đặt
-    $btnInstall = New-Object Windows.Forms.Button
-    $btnInstall.Text     = "Cài đặt"
-    $btnInstall.Size     = New-Object Drawing.Size(80,30)
-    $btnInstall.Location = New-Object Drawing.Point(350,550)
-    $btnInstall.Font     = New-Object Drawing.Font("Segoe UI",11)
-    $btnInstall.Add_Click({ Install-SelectedApplications })
-    $form.Controls.Add($btnInstall)
+# =========================
+# Form chính
+# =========================
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "Công Ty TNHH Thương Mại Và Sản Xuất MiT"
+$form.Size = New-Object System.Drawing.Size(800,750)
+$form.StartPosition = "CenterScreen"
+$form.BackColor = [System.Drawing.Color]::FromArgb(250,250,250)
 
-# 5. Nút Thoát
-    $btnExit = New-Object Windows.Forms.Button
-    $btnExit.Text     = "Thoát"
-    $btnExit.Size     = New-Object Drawing.Size(80,30)
-    $btnExit.Location = New-Object Drawing.Point(460,550)
-    $btnExit.Font     = New-Object Drawing.Font("Segoe UI",11)
-    $btnExit.Add_Click({ $form.Close() })
-    $form.Controls.Add($btnExit)
+# Logo
+$logo = $null
+if (Test-Path "C:\MiT\logo.png") {
+    $logo = New-Object System.Windows.Forms.PictureBox
+    $logo.Size = New-Object System.Drawing.Size(300,80)
+    $logo.SizeMode = 'Zoom'
+    $logo.Image = [System.Drawing.Image]::FromFile("C:\MiT\logo.png")
+    $form.Controls.Add($logo)
 
+    # Auto căn giữa khi form load hoặc resize
+    $form.Add_Shown({
+        $logo.Location = New-Object System.Drawing.Point(
+            [math]::Max(0, ($form.ClientSize.Width - $logo.Width) / 2),
+            20
+        )
+    })
+    $form.Add_Resize({
+        $logo.Location = New-Object System.Drawing.Point(
+            [math]::Max(0, ($form.ClientSize.Width - $logo.Width) / 2),
+            20
+        )
+    })
+}
 
-$form.ShowDialog()
+# =========================
+# Thêm App Cards
+# =========================
+$x = 40
+$y = 120
+$col = 0
+$rowHeight = 140
+$colWidth = 140
+$maxCol = 5   # số card trên 1 hàng
+
+foreach ($app in $apps) {
+    New-AppCard $app $x $y $form
+
+    $col++
+    if ($col -ge $maxCol) {
+        $col = 0
+        $x = 40
+        $y += $rowHeight
+    } else {
+        $x += $colWidth
+    }
+}
+
+# =========================
+# Nút Cài đặt & Thoát
+# =========================
+$btnInstall = New-Object System.Windows.Forms.Button
+$btnInstall.Text = "Cài đặt"
+$btnInstall.Size = New-Object System.Drawing.Size(120,35)
+$btnInstall.Location = New-Object System.Drawing.Point(500,650)
+$btnInstall.BackColor = [System.Drawing.Color]::FromArgb(0,120,215)
+$btnInstall.ForeColor = [System.Drawing.Color]::White
+$btnInstall.FlatStyle = "Flat"
+$btnInstall.Font = New-Object System.Drawing.Font("Segoe UI",10,[System.Drawing.FontStyle]::Bold)
+$btnInstall.Add_Click({
+    # Tạo danh sách app được tick từ Panel
+    $global:listBox = New-Object System.Windows.Forms.CheckedListBox
+    foreach ($p in $global:AppPanels) {
+        if ($p.Tag.Selected) {
+            # Thêm app.Name vào listBox.CheckedItems ảo
+            $null = $global:listBox.Items.Add($p.Tag.App.Name, $true)
+        }
+    }
+
+    # Gọi hàm cài đặt gốc
+    Install-SelectedApplications
+})
+$form.Controls.Add($btnInstall)
+
+$btnExit = New-Object System.Windows.Forms.Button
+$btnExit.Text = "Thoát"
+$btnExit.Size = New-Object System.Drawing.Size(120,35)
+$btnExit.Location = New-Object System.Drawing.Point(630,650)
+$btnExit.BackColor = [System.Drawing.Color]::FromArgb(220,53,69)
+$btnExit.ForeColor = [System.Drawing.Color]::White
+$btnExit.FlatStyle = "Flat"
+$btnExit.Font = New-Object System.Drawing.Font("Segoe UI",10,[System.Drawing.FontStyle]::Bold)
+$btnExit.Add_Click({ $form.Close() })
+$form.Controls.Add($btnExit)
+
+# =========================
+# Chạy form
+# =========================
+[System.Windows.Forms.Application]::Run($form)
+
