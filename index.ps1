@@ -1390,27 +1390,27 @@ function New-AppCard($app, $x, $y, $form) {
     # Toggle chọn/bỏ chọn
     # =====================
     $toggleSelection = {
-        if (-not $panel.Tag.Selected) {
+        if (-not $panelTag["Selected"]) {
             $panel.BackColor = [System.Drawing.Color]::FromArgb(220,240,255)
             $panel.BorderStyle = "Fixed3D"
-            $panel.Tag.Selected = $true
+            $panelTag["Selected"] = $true
         }
         else {
             $panel.BackColor = [System.Drawing.Color]::White
             $panel.BorderStyle = "FixedSingle"
-            $panel.Tag.Selected = $false
+            $panelTag["Selected"] = $false
         }
     }
 
     # Hover effect
     $panel.Add_MouseEnter({
-        if (-not $this.Tag.Selected) {
+        if (-not $thisTag["Selected"]) {
             $this.BackColor = [System.Drawing.Color]::FromArgb(245,250,255)
             $this.BorderStyle = "Fixed3D"
         }
     })
     $panel.Add_MouseLeave({
-        if (-not $this.Tag.Selected) {
+        if (-not $thisTag["Selected"]) {
             $this.BackColor = [System.Drawing.Color]::White
             $this.BorderStyle = "FixedSingle"
         }
@@ -1534,7 +1534,7 @@ $btnInstall.Add_Click({
     # Tạo danh sách app được tick từ Panel
     $global:listBox = New-Object System.Windows.Forms.CheckedListBox
     foreach ($p in $global:AppPanels) {
-        if ($p.Tag.Selected) {
+        if ($pTag["Selected"]) {
             # Thêm app.Name vào listBox.CheckedItems ảo
             $null = $global:listBox.Items.Add($p.Tag.App.Name, $true)
         }
