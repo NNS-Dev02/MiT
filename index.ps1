@@ -1,4 +1,7 @@
-﻿$folder = "C:\MiT"
+﻿# =========================
+# Chuẩn bị thư mục & dữ liệu
+# =========================
+$folder = "C:\MiT"
 if (-not (Test-Path $folder)) {
     New-Item -ItemType Directory -Path $folder | Out-Null
 }
@@ -1357,69 +1360,102 @@ $global:AppPanels = @()
 function New-AppCard($app, $x, $y, $form) {
     # Panel chính
     $panel = New-Object System.Windows.Forms.Panel
-    $panel.Size = New-Object System.Drawing.Size(120,130)
+    $panel.Size = New-Object System.Drawing.Size(140,150)
     $panel.Location = New-Object System.Drawing.Point($x,$y)
     $panel.BackColor = [System.Drawing.Color]::White
-    $panel.BorderStyle = "FixedSingle"
     $panel.Cursor = [System.Windows.Forms.Cursors]::Hand
-
     $panel.Tag = @{App=$app; Selected=$false}
+
+    # Vẽ bo góc + đổ bóng
+    $panel.Add_Paint({
+        param($sender, $e)
+        $graphics = $e.Graphics
+        $graphics.SmoothingMode = "AntiAlias"
+
+        $rect = [System.Drawing.Rectangle]::FromLTRB(0, 0, $sender.Width-1, $sender.Height-1)
+        $path = New-Object System.Drawing.Drawing2D.GraphicsPath
+        $radius = 12
+
+        $path.AddArc($rect.X, $rect.Y, $radius, $radius, 180, 90)
+        $path.AddArc($rect.Right - $radius, $rect.Y, $radius, $radius, 270, 90)
+        $path.AddArc($rect.Right - $radius, $rect.Bottom - $radius, $radius, $radius, 0, 90)
+        $path.AddArc($rect.X, $rect.Bottom - $radius, $radius, $radius, 90, 90)
+        $path.CloseFigure()
+
+        # Brush cho màu nền
+        $brush = New-Object System.Drawing.SolidBrush($sender.BackColor)
+        $graphics.FillPath($brush, $path)
+        $brush.Dispose()
+
+        # Đổ bóng nhẹ
+        $shadowColor = [System.Drawing.Color]::FromArgb(60, 0, 0, 0)
+        $pen = New-Object System.Drawing.Pen($shadowColor, 1)
+        $graphics.DrawPath($pen, $path)
+        $pen.Dispose()
+    })
 
     # Icon
     $pic = New-Object System.Windows.Forms.PictureBox
-    $pic.Size = New-Object System.Drawing.Size(64,64)
-    $pic.Location = New-Object System.Drawing.Point(28,15)
+    $pic.Size = New-Object System.Drawing.Size(72,72)
+    $pic.Location = New-Object System.Drawing.Point(34,15)
     $pic.SizeMode = "Zoom"
     if ($app.Icon -and (Test-Path $app.Icon)) {
         $pic.Image = [System.Drawing.Image]::FromFile($app.Icon)
     }
     $panel.Controls.Add($pic)
 
-    # Label
+    # Label tên ứng dụng
     $lbl = New-Object System.Windows.Forms.Label
     $lbl.Text = $app.Name
-    $lbl.Font = New-Object System.Drawing.Font("Segoe UI",9,[System.Drawing.FontStyle]::Bold)
-    $lbl.ForeColor = [System.Drawing.Color]::FromArgb(40,40,40)
+    $lbl.Font = New-Object System.Drawing.Font("Segoe UI",10,[System.Drawing.FontStyle]::Bold)
+    $lbl.ForeColor = [System.Drawing.Color]::FromArgb(33,33,33)
     $lbl.TextAlign = "MiddleCenter"
     $lbl.Dock = "Bottom"
-    $lbl.Height = 30
-    $lbl.Cursor = [System.Windows.Forms.Cursors]::Hand
+    $lbl.Height = 35
     $panel.Controls.Add($lbl)
 
-    # =====================
-    # Toggle chọn/bỏ chọn
-    # =====================
-    $toggleSelection = {
-        if (-not $panelTag["Selected"]) {
-            $panel.BackColor = [System.Drawing.Color]::FromArgb(220,240,255)
-            $panel.BorderStyle = "Fixed3D"
-            $panelTag["Selected"] = $true
+    # Hàm xử lý chọn/deselect card
+    $onCardClick = {
+        $targetPanel = if ($this -is [System.Windows.Forms.Panel]) { $this } else { $this.Parent }
+
+        if (-not $targetPanel.Tag.Selected) {
+            $targetPanel.Tag.Selected = $true
+            $targetPanel.BackColor = [System.Drawing.Color]::FromArgb(0,120,215)
+            foreach ($c in $targetPanel.Controls) {
+                if ($c -is [System.Windows.Forms.Label]) {
+                    $c.ForeColor = [System.Drawing.Color]::White
+                }
+            }
+        } else {
+            $targetPanel.Tag.Selected = $false
+            $targetPanel.BackColor = [System.Drawing.Color]::White
+            foreach ($c in $targetPanel.Controls) {
+                if ($c -is [System.Windows.Forms.Label]) {
+                    $c.ForeColor = [System.Drawing.Color]::FromArgb(33,33,33)
+                }
+            }
         }
-        else {
-            $panel.BackColor = [System.Drawing.Color]::White
-            $panel.BorderStyle = "FixedSingle"
-            $panelTag["Selected"] = $false
-        }
+        $targetPanel.Invalidate()
     }
 
-    # Hover effect
+    # Gán sự kiện click cho panel, icon, label
+    $panel.Add_Click($onCardClick)
+    $pic.Add_Click($onCardClick)
+    $lbl.Add_Click($onCardClick)
+
+    # Hover effect hiện đại
     $panel.Add_MouseEnter({
-        if (-not $thisTag["Selected"]) {
+        if (-not $this.Tag.Selected) {
             $this.BackColor = [System.Drawing.Color]::FromArgb(245,250,255)
-            $this.BorderStyle = "Fixed3D"
+            $this.Invalidate()
         }
     })
     $panel.Add_MouseLeave({
-        if (-not $thisTag["Selected"]) {
+        if (-not $this.Tag.Selected) {
             $this.BackColor = [System.Drawing.Color]::White
-            $this.BorderStyle = "FixedSingle"
+            $this.Invalidate()
         }
     })
-
-    # Click gán toggle
-    $panel.Add_Click($toggleSelection)
-    $pic.Add_Click({ $panel.PerformClick() })
-    $lbl.Add_Click({ $panel.PerformClick() })
 
     # Thêm vào form
     $form.Controls.Add($panel)
@@ -1534,7 +1570,7 @@ $btnInstall.Add_Click({
     # Tạo danh sách app được tick từ Panel
     $global:listBox = New-Object System.Windows.Forms.CheckedListBox
     foreach ($p in $global:AppPanels) {
-        if ($pTag["Selected"]) {
+        if ($p.Tag.Selected) {
             # Thêm app.Name vào listBox.CheckedItems ảo
             $null = $global:listBox.Items.Add($p.Tag.App.Name, $true)
         }
@@ -1560,4 +1596,3 @@ $form.Controls.Add($btnExit)
 # Chạy form
 # =========================
 [System.Windows.Forms.Application]::Run($form)
-
