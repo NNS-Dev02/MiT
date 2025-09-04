@@ -1,4 +1,36 @@
-﻿# Bật Visual Styles cho WinForms
+﻿# =========================
+# Chuẩn bị thư mục & dữ liệu
+# =========================
+$folder = "C:\MiT"
+if (-not (Test-Path $folder)) {
+    New-Item -ItemType Directory -Path $folder | Out-Null
+}
+
+# Link gốc GitHub
+$baseUrl = "https://raw.githubusercontent.com/NNS-Dev02/MiT/main"
+
+# apps.txt
+$appsFile = Join-Path $folder "apps.txt"
+if (-not (Test-Path $appsFile)) {
+    Invoke-WebRequest -Uri "$baseUrl/apps.txt" -OutFile $appsFile
+}
+
+# logo.png
+$logoFile = Join-Path $folder "logo.png"
+if (-not (Test-Path $logoFile)) {
+    Invoke-WebRequest -Uri "$baseUrl/logo.png" -OutFile $logoFile
+}
+
+# icons.zip
+$iconsFolder = Join-Path $folder "icons"
+if (-not (Test-Path $iconsFolder)) {
+    $iconsZipPath = Join-Path $folder "icons.zip"
+    Invoke-WebRequest -Uri "$baseUrl/icons.zip" -OutFile $iconsZipPath
+    Expand-Archive -Path $iconsZipPath -DestinationPath $folder -Force
+    Remove-Item $iconsZipPath
+}
+
+# Bật Visual Styles cho WinForms
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
     [Windows.Forms.Application]::EnableVisualStyles()
