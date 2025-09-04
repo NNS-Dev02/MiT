@@ -1389,6 +1389,20 @@ function New-AppCard($app, $x, $y, $form) {
 }
 
 # =========================
+# Chuẩn bị thư mục & icons
+# =========================
+$folder = "C:\MiT"
+$iconsZipUrl = "https://raw.githubusercontent.com/NNS-Dev02/MiT/main/icons.zip"
+$iconsZipPath = Join-Path $folder "icons.zip"
+$iconsFolder = Join-Path $folder "icons"
+
+if (-not (Test-Path $iconsFolder)) {
+    Invoke-WebRequest -Uri $iconsZipUrl -OutFile $iconsZipPath
+    Expand-Archive -Path $iconsZipPath -DestinationPath $folder -Force
+    Remove-Item $iconsZipPath
+}
+
+# =========================
 # Đọc file apps.txt
 # =========================
 $apps = @()
