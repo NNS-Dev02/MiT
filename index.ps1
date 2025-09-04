@@ -1,7 +1,4 @@
-﻿# =========================
-# Chuẩn bị thư mục & dữ liệu
-# =========================
-$folder = "C:\MiT"
+﻿$folder = "C:\MiT"
 if (-not (Test-Path $folder)) {
     New-Item -ItemType Directory -Path $folder | Out-Null
 }
@@ -1386,7 +1383,24 @@ function New-AppCard($app, $x, $y, $form) {
     $lbl.TextAlign = "MiddleCenter"
     $lbl.Dock = "Bottom"
     $lbl.Height = 30
+    $lbl.Cursor = [System.Windows.Forms.Cursors]::Hand
     $panel.Controls.Add($lbl)
+
+    # =====================
+    # Toggle chọn/bỏ chọn
+    # =====================
+    $toggleSelection = {
+        if (-not $panel.Tag.Selected) {
+            $panel.BackColor = [System.Drawing.Color]::FromArgb(220,240,255)
+            $panel.BorderStyle = "Fixed3D"
+            $panel.Tag.Selected = $true
+        }
+        else {
+            $panel.BackColor = [System.Drawing.Color]::White
+            $panel.BorderStyle = "FixedSingle"
+            $panel.Tag.Selected = $false
+        }
+    }
 
     # Hover effect
     $panel.Add_MouseEnter({
@@ -1402,23 +1416,16 @@ function New-AppCard($app, $x, $y, $form) {
         }
     })
 
-    # Click effect
-    $panel.Add_Click({
-        if (-not $this.Tag.Selected) {
-            $this.BackColor = [System.Drawing.Color]::FromArgb(220,240,255)
-            $this.BorderStyle = "Fixed3D"
-            $this.Tag.Selected = $true
-        }
-        else {
-            $this.BackColor = [System.Drawing.Color]::White
-            $this.BorderStyle = "FixedSingle"
-            $this.Tag.Selected = $false
-        }
-    })
+    # Click gán toggle
+    $panel.Add_Click($toggleSelection)
+    $pic.Add_Click({ $panel.PerformClick() })
+    $lbl.Add_Click({ $panel.PerformClick() })
 
+    # Thêm vào form
     $form.Controls.Add($panel)
     $global:AppPanels += $panel
 }
+
 
 # =========================
 # Chuẩn bị thư mục & icons
