@@ -941,7 +941,7 @@ function Show-OfficeSuiteForm {
     $form.FormBorderStyle = "FixedDialog"
     $form.MinimizeBox = $false
     $form.MaximizeBox = $false
-    $form.ControlBox = $false
+    $form.ControlBox = $true
     $form.Topmost = $true
 
     $checkedListBox = New-Object System.Windows.Forms.CheckedListBox
@@ -1061,6 +1061,7 @@ function Download-WithLoading {
 $appCrack = @{
     "Adobe Acrobat Pro" = "https://drive.google.com/uc?export=download&id=1cYVs3Jnw5S9WsBNau3BRie7XaEDPZMhN"
     "AutoCAD 2022"       = "https://drive.google.com/uc?export=download&id=1xODjUqtQN4f9SY4U30Ff-ghsrSIeDb34"
+    "EaseUS Data Recovery Wizard" = "https://drive.google.com/uc?export=download&id=1fRV9Wp8w67RUjKHnz3jlJwOmG1OCR8KG"
 }
 
 # 2. Hàm chọn ứng dụng App Crack
@@ -1077,7 +1078,7 @@ function Show-appCrackSuiteForm {
     $form.FormBorderStyle = "FixedDialog"
     $form.MinimizeBox = $false
     $form.MaximizeBox = $false
-    $form.ControlBox = $false
+    $form.ControlBox = $true
     $form.Topmost = $true
 
     $checkedListBox = New-Object System.Windows.Forms.CheckedListBox
@@ -1360,9 +1361,10 @@ $global:AppPanels = @()
 function New-AppCard($app, $x, $y, $form) {
     # Panel chính
     $panel = New-Object System.Windows.Forms.Panel
-    $panel.Size = New-Object System.Drawing.Size(140,150)
+    $panel.Size = New-Object System.Drawing.Size(110,120)
     $panel.Location = New-Object System.Drawing.Point($x,$y)
     $panel.BackColor = [System.Drawing.Color]::White
+    $panel.BorderStyle = "FixedSingle"
     $panel.Cursor = [System.Windows.Forms.Cursors]::Hand
     $panel.Tag = @{App=$app; Selected=$false}
 
@@ -1376,16 +1378,17 @@ function New-AppCard($app, $x, $y, $form) {
         $path = New-Object System.Drawing.Drawing2D.GraphicsPath
         $radius = 12
 
-        $path.AddArc($rect.X, $rect.Y, $radius, $radius, 180, 90)
-        $path.AddArc($rect.Right - $radius, $rect.Y, $radius, $radius, 270, 90)
-        $path.AddArc($rect.Right - $radius, $rect.Bottom - $radius, $radius, $radius, 0, 90)
-        $path.AddArc($rect.X, $rect.Bottom - $radius, $radius, $radius, 90, 90)
-        $path.CloseFigure()
+        # $path.AddArc($rect.X, $rect.Y, $radius, $radius, 180, 90)
+        # $path.AddArc($rect.Right - $radius, $rect.Y, $radius, $radius, 270, 90)
+        # $path.AddArc($rect.Right - $radius, $rect.Bottom - $radius, $radius, $radius, 0, 90)
+        # $path.AddArc($rect.X, $rect.Bottom - $radius, $radius, $radius, 90, 90)
+        # $path.CloseFigure()
 
         # Brush cho màu nền
         $brush = New-Object System.Drawing.SolidBrush($sender.BackColor)
         $graphics.FillPath($brush, $path)
         $brush.Dispose()
+        
 
         # Đổ bóng nhẹ
         $shadowColor = [System.Drawing.Color]::FromArgb(60, 0, 0, 0)
@@ -1396,8 +1399,8 @@ function New-AppCard($app, $x, $y, $form) {
 
     # Icon
     $pic = New-Object System.Windows.Forms.PictureBox
-    $pic.Size = New-Object System.Drawing.Size(72,72)
-    $pic.Location = New-Object System.Drawing.Point(34,15)
+    $pic.Size = New-Object System.Drawing.Size(56,56)
+    $pic.Location = New-Object System.Drawing.Point(27,10)
     $pic.SizeMode = "Zoom"
     if ($app.Icon -and (Test-Path $app.Icon)) {
         $pic.Image = [System.Drawing.Image]::FromFile($app.Icon)
@@ -1407,11 +1410,11 @@ function New-AppCard($app, $x, $y, $form) {
     # Label tên ứng dụng
     $lbl = New-Object System.Windows.Forms.Label
     $lbl.Text = $app.Name
-    $lbl.Font = New-Object System.Drawing.Font("Segoe UI",10,[System.Drawing.FontStyle]::Bold)
+    $lbl.Font = New-Object System.Drawing.Font("Segoe UI",8,[System.Drawing.FontStyle]::Bold)
     $lbl.ForeColor = [System.Drawing.Color]::FromArgb(33,33,33)
     $lbl.TextAlign = "MiddleCenter"
     $lbl.Dock = "Bottom"
-    $lbl.Height = 35
+    $lbl.Height = 30
     $panel.Controls.Add($lbl)
 
     # Hàm xử lý chọn/deselect card
@@ -1504,7 +1507,7 @@ Get-Content "C:\MiT\apps.txt" | ForEach-Object {
 # =========================
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "Công Ty TNHH Thương Mại Và Sản Xuất MiT"
-$form.Size = New-Object System.Drawing.Size(800,750)
+$form.Size = New-Object System.Drawing.Size(800,630)
 $form.StartPosition = "CenterScreen"
 $form.BackColor = [System.Drawing.Color]::FromArgb(250,250,250)
 
@@ -1538,9 +1541,9 @@ if (Test-Path "C:\MiT\logo.png") {
 $x = 40
 $y = 120
 $col = 0
-$rowHeight = 140
-$colWidth = 140
-$maxCol = 5   # số card trên 1 hàng
+$rowHeight = 130
+$colWidth = 120
+$maxCol = 6
 
 foreach ($app in $apps) {
     New-AppCard $app $x $y $form
@@ -1561,7 +1564,7 @@ foreach ($app in $apps) {
 $btnInstall = New-Object System.Windows.Forms.Button
 $btnInstall.Text = "Cài đặt"
 $btnInstall.Size = New-Object System.Drawing.Size(120,35)
-$btnInstall.Location = New-Object System.Drawing.Point(500,650)
+$btnInstall.Location = New-Object System.Drawing.Point(500,530)
 $btnInstall.BackColor = [System.Drawing.Color]::FromArgb(0,120,215)
 $btnInstall.ForeColor = [System.Drawing.Color]::White
 $btnInstall.FlatStyle = "Flat"
@@ -1584,7 +1587,7 @@ $form.Controls.Add($btnInstall)
 $btnExit = New-Object System.Windows.Forms.Button
 $btnExit.Text = "Thoát"
 $btnExit.Size = New-Object System.Drawing.Size(120,35)
-$btnExit.Location = New-Object System.Drawing.Point(630,650)
+$btnExit.Location = New-Object System.Drawing.Point(630,530)
 $btnExit.BackColor = [System.Drawing.Color]::FromArgb(220,53,69)
 $btnExit.ForeColor = [System.Drawing.Color]::White
 $btnExit.FlatStyle = "Flat"
