@@ -1507,7 +1507,7 @@ Get-Content "C:\MiT\apps.txt" | ForEach-Object {
 # =========================
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "Công Ty TNHH Thương Mại Và Sản Xuất MiT"
-$form.Size = New-Object System.Drawing.Size(800,630)
+$form.Size = New-Object System.Drawing.Size(930,630)
 $form.StartPosition = "CenterScreen"
 $form.BackColor = [System.Drawing.Color]::FromArgb(250,250,250)
 
@@ -1543,7 +1543,7 @@ $y = 120
 $col = 0
 $rowHeight = 130
 $colWidth = 120
-$maxCol = 6
+$maxCol = 7
 
 foreach ($app in $apps) {
     New-AppCard $app $x $y $form
