@@ -1006,7 +1006,7 @@ switch ($action) {
     }
 
     default {
-        Write-Host "Hành động không xác định: $action"
+        # Write-Host "Hành động không xác định: $action"
     }
 }
 # 4. Hàm Download-WithLoading
@@ -1144,7 +1144,7 @@ switch ($action) {
     }
 
     default {
-        Write-Host "Hành động không xác định: $action"
+        # Write-Host "Hành động không xác định: $action"
     }
 }
 
