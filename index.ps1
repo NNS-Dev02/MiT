@@ -175,41 +175,41 @@ $core = "C:\Program Files\Core Temp\Core Temp.exe"
 $coreTempInstallDir = Split-Path $core
 
 if (Test-Path $core) {
-    Write-Host "----------------------------------------------------------------------------------------------------`n------------------------------Core Temp------------------------------" -ForegroundColor DarkYellow
+    Write-Host "----------------------------------------------------------------------------------------------------`n------------------------------Core Temp------------------------------" -ForegroundColor Red
 
     $tempCsvInDownloads = Join-Path $dl "temp.csv"
     if (Test-Path $tempCsvInDownloads) {
         Remove-Item $tempCsvInDownloads -ErrorAction SilentlyContinue
-        Write-Host "Xóa file temp.csv cũ trong thư mục Downloads." -ForegroundColor DarkYellow
+        Write-Host "Xóa file temp.csv cũ trong thư mục Downloads." -ForegroundColor Red
     }
 
     Get-ChildItem -Path $coreTempInstallDir -Filter "CT-Log*.csv" -ErrorAction SilentlyContinue | ForEach-Object {
         Remove-Item $_.FullName -ErrorAction SilentlyContinue
-        Write-Host "Xóa file log cũ: $($_.Name)" -ForegroundColor DarkYellow
+        Write-Host "Xóa file log cũ: $($_.Name)" -ForegroundColor Red
     }
 
     $p = Start-Process $core -PassThru
     Start-Sleep 5
 
     if ($p -and -not $p.HasExited -and $p.MainWindowHandle -ne 0) {
-        Write-Host "Phát hiện cửa sổ Core Temp." -ForegroundColor DarkYellow
+        Write-Host "Phát hiện cửa sổ Core Temp." -ForegroundColor Red
         [Native.WinApi]::SetForegroundWindow($p.MainWindowHandle)
         Start-Sleep 2
 
         [System.Windows.Forms.SendKeys]::SendWait("{F4}")
-        Write-Host "Gửi phím F4 để bắt đầu ghi log, chờ 10 giây để thu thập dữ liệu..." -ForegroundColor DarkYellow
+        Write-Host "Gửi phím F4 để bắt đầu ghi log, chờ 10 giây để thu thập dữ liệu..." -ForegroundColor Red
         Start-Sleep 10
 
         [System.Windows.Forms.SendKeys]::SendWait("{F4}")
-        Write-Host "Gửi phím F4 lần nữa để dừng ghi log." -ForegroundColor DarkYellow
+        Write-Host "Gửi phím F4 lần nữa để dừng ghi log." -ForegroundColor Red
         Start-Sleep 2
 
-        Write-Host "Đóng ứng dụng Core Temp..." -ForegroundColor DarkYellow
+        Write-Host "Đóng ứng dụng Core Temp..." -ForegroundColor Red
         $p.CloseMainWindow()
         Start-Sleep 2
         if (-not $p.HasExited) {
             Stop-Process -Id $p.Id -Force
-            Write-Host "Core Temp chưa đóng, đã buộc tắt tiến trình." -ForegroundColor DarkYellow
+            Write-Host "Core Temp chưa đóng, đã buộc tắt tiến trình." -ForegroundColor Red
         }
 
         $newestCoreTempCsv = $null
@@ -223,19 +223,19 @@ if (Test-Path $core) {
 
         if ($newestCoreTempCsv) {
             Move-Item $newestCoreTempCsv.FullName $tempCsvInDownloads -Force
-            Write-Host "Tìm thấy file log của Core Temp: $($newestCoreTempCsv.Name)" -ForegroundColor DarkYellow
-            Write-Host "Di chuyển và đổi tên thành temp.csv trong thư mục Downloads." -ForegroundColor DarkYellow
+            Write-Host "Tìm thấy file log của Core Temp: $($newestCoreTempCsv.Name)" -ForegroundColor Red
+            Write-Host "Di chuyển và đổi tên thành temp.csv trong thư mục Downloads." -ForegroundColor Red
         } else {
-            Write-Host "Không tìm thấy file log CSV của Core Temp trong vòng 15 giây gần đây tại thư mục '$coreTempInstallDir'." -ForegroundColor DarkYellow
-            Write-Host "Vui lòng kiểm tra thủ công Core Temp để chắc chắn rằng nó đang ghi log bằng phím F4 và xác định vị trí lưu file log." -ForegroundColor DarkYellow
+            Write-Host "Không tìm thấy file log CSV của Core Temp trong vòng 15 giây gần đây tại thư mục '$coreTempInstallDir'." -ForegroundColor Red
+            Write-Host "Vui lòng kiểm tra thủ công Core Temp để chắc chắn rằng nó đang ghi log bằng phím F4 và xác định vị trí lưu file log." -ForegroundColor Red
         }
 
     } else {
-        Write-Host "Không phát hiện được cửa sổ Core Temp hoặc chương trình đã đóng sớm." -ForegroundColor DarkYellow
-        Write-Host "Vui lòng đảm bảo rằng Core Temp đang chạy và không có cửa sổ/hộp thoại nào chặn lại." -ForegroundColor DarkYellow
+        Write-Host "Không phát hiện được cửa sổ Core Temp hoặc chương trình đã đóng sớm." -ForegroundColor Red
+        Write-Host "Vui lòng đảm bảo rằng Core Temp đang chạy và không có cửa sổ/hộp thoại nào chặn lại." -ForegroundColor Red
     }
 } else {
-    Write-Host "Không tìm thấy file Core Temp.exe tại đường dẫn: $core" -ForegroundColor DarkYellow
+    Write-Host "Không tìm thấy file Core Temp.exe tại đường dẫn: $core" -ForegroundColor Red
 }
 
 
@@ -358,24 +358,24 @@ if (Test-Path $cd) {
 function Get-CPUAvgTemp {
     $f = Join-Path $dl "temp.csv"
     if (-not (Test-Path $f)) {
-        Write-Host "File temp.csv không tìm thấy tại $f khi cố gắng đọc nhiệt độ." -ForegroundColor DarkYellow
+        Write-Host "File temp.csv không tìm thấy tại $f khi cố gắng đọc nhiệt độ." -ForegroundColor Red
         return "N/A"
     }
 
-    # Write-Host "Đang đọc nội dung file temp.csv (Core Temp log)..." -ForegroundColor DarkYellow
+    # Write-Host "Đang đọc nội dung file temp.csv (Core Temp log)..." -ForegroundColor Red
     
     try {
         $fileContentRaw = Get-Content $f -Encoding UTF8 -Raw -ErrorAction Stop
         $fileLines = $fileContentRaw.Split([Environment]::NewLine) | Where-Object { $_.Trim() -ne "" }
     } catch {
-        Write-Host "Lỗi khi đọc file temp.csv: $($_.Exception.Message)" -ForegroundColor DarkYellow
+        Write-Host "Lỗi khi đọc file temp.csv: $($_.Exception.Message)" -ForegroundColor Red
         return "N/A"
     }
 
     if ($fileLines.Count -lt 9) {
-        Write-Host "File temp.csv không đủ dòng để đọc nhiệt độ (cần ít nhất 9 dòng)." -ForegroundColor DarkYellow
-        Write-Host "Nội dung file:" -ForegroundColor DarkYellow
-        $fileLines | ForEach-Object { Write-Host "   $_" -ForegroundColor DarkYellow }
+        Write-Host "File temp.csv không đủ dòng để đọc nhiệt độ (cần ít nhất 9 dòng)." -ForegroundColor Red
+        Write-Host "Nội dung file:" -ForegroundColor Red
+        $fileLines | ForEach-Object { Write-Host "   $_" -ForegroundColor Red }
         return "N/A"
     }
 
@@ -383,9 +383,9 @@ function Get-CPUAvgTemp {
     $dataLines = $fileLines[7..($fileLines.Count - 1)]
 
     if ($dataLines.Count -gt 0) {
-        # Write-Host "Dòng dữ liệu đầu tiên được đọc: '$($dataLines[0])'" -ForegroundColor DarkYellow
+        # Write-Host "Dòng dữ liệu đầu tiên được đọc: '$($dataLines[0])'" -ForegroundColor Red
     } else {
-        Write-Host "Không có dòng dữ liệu nào sau header." -ForegroundColor DarkYellow
+        Write-Host "Không có dòng dữ liệu nào sau header." -ForegroundColor Red
         return "N/A"
     }
 
@@ -400,8 +400,8 @@ function Get-CPUAvgTemp {
     }
 
     if ($tempColumnIndices.Count -eq 0) {
-        Write-Host "Không tìm thấy bất kỳ cột nhiệt độ nào ('Core X Temp.') trong header." -ForegroundColor DarkYellow
-        Write-Host "Header đầy đủ: '$headerLine'" -ForegroundColor DarkYellow
+        Write-Host "Không tìm thấy bất kỳ cột nhiệt độ nào ('Core X Temp.') trong header." -ForegroundColor Red
+        Write-Host "Header đầy đủ: '$headerLine'" -ForegroundColor Red
         return "N/A"
     }
 
@@ -416,14 +416,14 @@ function Get-CPUAvgTemp {
                     $valToConvert = $val -replace '[^0-9\.-]', ''
                     $temps += [double]$valToConvert
                 } catch {
-                    Write-Host "Không thể chuyển đổi '$val' (từ cột '$($headers[$index])') thành số. Lỗi: $($_.Exception.Message)" -ForegroundColor DarkYellow
+                    Write-Host "Không thể chuyển đổi '$val' (từ cột '$($headers[$index])') thành số. Lỗi: $($_.Exception.Message)" -ForegroundColor Red
                 }
             }
         }
     }
 
     if ($temps.Count -eq 0) {
-        Write-Host "Không tìm thấy dữ liệu nhiệt độ hợp lệ từ các cột Core X Temp trong dòng dữ liệu đầu tiên." -ForegroundColor DarkYellow
+        Write-Host "Không tìm thấy dữ liệu nhiệt độ hợp lệ từ các cột Core X Temp trong dòng dữ liệu đầu tiên." -ForegroundColor Red
         return "N/A"
     }
 
