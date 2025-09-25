@@ -613,111 +613,111 @@ if (Test-Path $diskLog) {
         $officeStatus = "Không có Office hoặc không mở được Word"
     }
 
-# 12. Check Mailbox status :
-$outlookSizeStatus = ""
+# # 12. Check Mailbox status :
+# $outlookSizeStatus = ""
 
-# Load WinAPI để điều khiển cửa sổ
-Add-Type @"
-using System;
-using System.Runtime.InteropServices;
-public class WinAPI {
-    [DllImport("user32.dll")]
-    public static extern bool SetForegroundWindow(IntPtr hWnd);
+# # Load WinAPI để điều khiển cửa sổ
+# Add-Type @"
+# using System;
+# using System.Runtime.InteropServices;
+# public class WinAPI {
+#     [DllImport("user32.dll")]
+#     public static extern bool SetForegroundWindow(IntPtr hWnd);
 
-    [DllImport("user32.dll")]
-    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+#     [DllImport("user32.dll")]
+#     public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-    public const int SW_RESTORE = 9;
-}
-"@
+#     public const int SW_RESTORE = 9;
+# }
+# "@
 
-# Load System.Windows.Forms 1 lần để dùng SendKeys
-Add-Type -AssemblyName System.Windows.Forms
+# # Load System.Windows.Forms 1 lần để dùng SendKeys
+# Add-Type -AssemblyName System.Windows.Forms
 
-function Bring-WindowToFront($processName) {
-    $process = Get-Process -Name $processName -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($process -and $process.MainWindowHandle -ne 0) {
-        [WinAPI]::ShowWindow($process.MainWindowHandle, [WinAPI]::SW_RESTORE) | Out-Null
-        [WinAPI]::SetForegroundWindow($process.MainWindowHandle) | Out-Null
-        return $true
-    }
-    return $false
-}
+# function Bring-WindowToFront($processName) {
+#     $process = Get-Process -Name $processName -ErrorAction SilentlyContinue | Select-Object -First 1
+#     if ($process -and $process.MainWindowHandle -ne 0) {
+#         [WinAPI]::ShowWindow($process.MainWindowHandle, [WinAPI]::SW_RESTORE) | Out-Null
+#         [WinAPI]::SetForegroundWindow($process.MainWindowHandle) | Out-Null
+#         return $true
+#     }
+#     return $false
+# }
 
-function Close-OutlookPopup {
-    param(
-        [string]$titlePattern
-    )
+# function Close-OutlookPopup {
+#     param(
+#         [string]$titlePattern
+#     )
 
-    $popup = Get-Process outlook -ErrorAction SilentlyContinue | Where-Object {
-        $_.MainWindowTitle -match $titlePattern
-    } | Select-Object -First 1
+#     $popup = Get-Process outlook -ErrorAction SilentlyContinue | Where-Object {
+#         $_.MainWindowTitle -match $titlePattern
+#     } | Select-Object -First 1
 
-    if ($popup) {
-        [WinAPI]::SetForegroundWindow($popup.MainWindowHandle) | Out-Null
-        Start-Sleep -Milliseconds 200
-        [System.Windows.Forms.SendKeys]::SendWait("%{F4}")
-        return $true
-    }
-    return $false
-}
+#     if ($popup) {
+#         [WinAPI]::SetForegroundWindow($popup.MainWindowHandle) | Out-Null
+#         Start-Sleep -Milliseconds 200
+#         [System.Windows.Forms.SendKeys]::SendWait("%{F4}")
+#         return $true
+#     }
+#     return $false
+# }
 
-# Ví dụ dùng:
-Close-OutlookPopup "New Profile"
-Close-OutlookPopup "Welcome to Outlook"
+# # Ví dụ dùng:
+# Close-OutlookPopup "New Profile"
+# Close-OutlookPopup "Welcome to Outlook"
 
-function Format-SizeGB ($bytes) {
-    return [math]::Round($bytes / 1GB, 2)
-}
+# function Format-SizeGB ($bytes) {
+#     return [math]::Round($bytes / 1GB, 2)
+# }
 
-try {
-    # Mở Outlook
-    $outlookProcess = Start-Process "outlook.exe" -PassThru
-    Start-Sleep -Seconds 3
+# try {
+#     # Mở Outlook
+#     $outlookProcess = Start-Process "outlook.exe" -PassThru
+#     Start-Sleep -Seconds 3
 
-    Close-OutlookFirstRun
-    Start-Sleep -Seconds 5
+#     Close-OutlookFirstRun
+#     Start-Sleep -Seconds 5
 
-    # Tạo COM object Outlook để lấy dữ liệu
-    $outlook = New-Object -ComObject Outlook.Application
-    $namespace = $outlook.GetNamespace("MAPI")
+#     # Tạo COM object Outlook để lấy dữ liệu
+#     $outlook = New-Object -ComObject Outlook.Application
+#     $namespace = $outlook.GetNamespace("MAPI")
 
-    $dungLuongChiTiet = @()
-    $tongDungLuong = 0
-    $tongToiDa = 50 * 1GB
+#     $dungLuongChiTiet = @()
+#     $tongDungLuong = 0
+#     $tongToiDa = 50 * 1GB
 
-    for ($i = 1; $i -le $namespace.Folders.Count; $i++) {
-        $folder = $namespace.Folders.Item($i)
-        $store = $folder.Store
-        $filePath = $store.FilePath
+#     for ($i = 1; $i -le $namespace.Folders.Count; $i++) {
+#         $folder = $namespace.Folders.Item($i)
+#         $store = $folder.Store
+#         $filePath = $store.FilePath
 
-        if ([string]::IsNullOrWhiteSpace($filePath) -or -not (Test-Path $filePath)) {
-            continue
-        }
+#         if ([string]::IsNullOrWhiteSpace($filePath) -or -not (Test-Path $filePath)) {
+#             continue
+#         }
 
-        $file = Get-Item $filePath
-        $fileSize = $file.Length
-        $tongDungLuong += $fileSize
+#         $file = Get-Item $filePath
+#         $fileSize = $file.Length
+#         $tongDungLuong += $fileSize
 
-        $sizeGB = Format-SizeGB $fileSize
-        $dungLuongChiTiet += "$($folder.Name): $sizeGB GB ($filePath)"
-    }
+#         $sizeGB = Format-SizeGB $fileSize
+#         $dungLuongChiTiet += "$($folder.Name): $sizeGB GB ($filePath)"
+#     }
 
-    if ($dungLuongChiTiet.Count -gt 0) {
-        $dungLuongDaDung = Format-SizeGB $tongDungLuong
-        $dungLuongToiDa = Format-SizeGB $tongToiDa
-        $outlookSizeStatus = "Tổng dung lượng Outlook: $dungLuongDaDung GB / $dungLuongToiDa GB`n" + ($dungLuongChiTiet -join "`n")
-    }
-    else {
-        $outlookSizeStatus = "Không sử dụng Outlook"
-    }
+#     if ($dungLuongChiTiet.Count -gt 0) {
+#         $dungLuongDaDung = Format-SizeGB $tongDungLuong
+#         $dungLuongToiDa = Format-SizeGB $tongToiDa
+#         $outlookSizeStatus = "Tổng dung lượng Outlook: $dungLuongDaDung GB / $dungLuongToiDa GB`n" + ($dungLuongChiTiet -join "`n")
+#     }
+#     else {
+#         $outlookSizeStatus = "Không sử dụng Outlook"
+#     }
 
-    # Tắt Outlook sau khi lấy dữ liệu
-    Stop-Process -Name outlook -ErrorAction SilentlyContinue
-}
-catch {
-    $outlookSizeStatus = "Không sử dụng Outlook"
-}
+#     # Tắt Outlook sau khi lấy dữ liệu
+#     Stop-Process -Name outlook -ErrorAction SilentlyContinue
+# }
+# catch {
+#     $outlookSizeStatus = "Không sử dụng Outlook"
+# }
 
 # 13. Check file Server/Nas/Onedrive :
     function Check-FileSharingStatus {
@@ -882,7 +882,7 @@ $diskHealth
 
 11. Check Office status : $officeStatus
 
-12. Check Mailbox status : $outlookSizeStatus
+12. Check Mailbox status : Chức năng chưa có
 
 13. Check file Server/Nas/Onedrive : $fileShareStatus
 
