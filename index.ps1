@@ -882,7 +882,7 @@ $diskHealth
 
 11. Check Office status : $officeStatus
 
-12. Check Mailbox status : Chức năng chưa có
+12. Check Mailbox status : Chức năng chưa có`r`n
 
 13. Check file Server/Nas/Onedrive : $fileShareStatus
 
@@ -1060,6 +1060,7 @@ function Download-WithLoading {
 # 1. Biến $appCrack
 $appCrack = @{
     "Adobe Acrobat Pro" = "https://drive.google.com/uc?export=download&id=1cYVs3Jnw5S9WsBNau3BRie7XaEDPZMhN"
+    "Adobe Photoshop 2021" = "https://drive.google.com/uc?export=download&id=1uJNkWEa-R38wY0P9hDWMUQvQ7loQqFAO"
     "AutoCAD 2022"       = "https://drive.google.com/uc?export=download&id=1xODjUqtQN4f9SY4U30Ff-ghsrSIeDb34"
     "EaseUS Data Recovery Wizard" = "https://drive.google.com/uc?export=download&id=1fRV9Wp8w67RUjKHnz3jlJwOmG1OCR8KG"
 }
