@@ -1079,7 +1079,7 @@ function Show-appCrackSuiteForm {
 
     $form = New-Object System.Windows.Forms.Form
     $form.Text = "Chọn Ứng dụng Crack"
-    $form.Size = New-Object System.Drawing.Size(350, 250)
+    $form.Size = New-Object System.Drawing.Size(350, 300)
     $form.StartPosition = "CenterScreen"
     $form.FormBorderStyle = "FixedDialog"
     $form.MinimizeBox = $false
@@ -1089,7 +1089,7 @@ function Show-appCrackSuiteForm {
 
     $checkedListBox = New-Object System.Windows.Forms.CheckedListBox
     $checkedListBox.Location = New-Object System.Drawing.Point(20, 20)
-    $checkedListBox.Size = New-Object System.Drawing.Size(300, 140)
+    $checkedListBox.Size = New-Object System.Drawing.Size(300, 190)
     $checkedListBox.CheckOnClick = $true
     $checkedListBox.Font = New-Object System.Drawing.Font("Segoe UI", 10)
 
@@ -1100,7 +1100,7 @@ function Show-appCrackSuiteForm {
 
     $btnOk = New-Object System.Windows.Forms.Button
     $btnOk.Text = "OK"
-    $btnOk.Location = New-Object System.Drawing.Point(120, 170)
+    $btnOk.Location = New-Object System.Drawing.Point(120, 210)
     $btnOk.Size = New-Object System.Drawing.Size(100, 30)
     $btnOk.DialogResult = [System.Windows.Forms.DialogResult]::OK
     $form.Controls.Add($btnOk)
