@@ -1059,9 +1059,14 @@ function Download-WithLoading {
 
 # 1. Biến $appCrack
 $appCrack = @{
+    "Windows Update Blocker (Wub)" = "https://drive.google.com/uc?export=download&id=141RgmT3UGw-wa-SAq4TwfKpZhOlUZYp5"
+    "Foxit PhantomPDF" = "https://drive.google.com/uc?export=download&id=1q42tUBenVFcjTs_rnl8M6vZnrj8ze6ER"
     "Adobe Acrobat Pro" = "https://drive.google.com/uc?export=download&id=1cYVs3Jnw5S9WsBNau3BRie7XaEDPZMhN"
     "Adobe Photoshop 2021" = "https://drive.google.com/uc?export=download&id=1uJNkWEa-R38wY0P9hDWMUQvQ7loQqFAO"
-    "AutoCAD 2022"       = "https://drive.google.com/uc?export=download&id=1xODjUqtQN4f9SY4U30Ff-ghsrSIeDb34"
+    "Adobe Premiere Pro 2021" = "https://drive.google.com/uc?export=download&id=1Glfk5zp45znq-13aeHGxnKJqDDHDDLUy"
+    "AutoCAD 2022" = "https://drive.google.com/uc?export=download&id=1xODjUqtQN4f9SY4U30Ff-ghsrSIeDb34"
+    "AutoCAD 2025" = "https://drive.google.com/uc?export=download&id=1RMjzCznIJ3hvzel3kPq_xmIkIGQZJLNz"
+    "Adobe Lightroom Classic 2024" = "https://drive.google.com/uc?export=download&id=1rCtzKAWgxxTZeH3T5W2N7PDqfmY-2VBD"
     "EaseUS Data Recovery Wizard" = "https://drive.google.com/uc?export=download&id=1fRV9Wp8w67RUjKHnz3jlJwOmG1OCR8KG"
 }
 
