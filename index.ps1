@@ -1061,6 +1061,7 @@ function Download-WithLoading {
 $appCrack = @{
     "Windows Update Blocker (Wub)" = "https://drive.google.com/uc?export=download&id=141RgmT3UGw-wa-SAq4TwfKpZhOlUZYp5"
     "Foxit PhantomPDF" = "https://drive.google.com/uc?export=download&id=1q42tUBenVFcjTs_rnl8M6vZnrj8ze6ER"
+    "Nitro PDF Pro" = "https://drive.google.com/uc?export=download&id=1r14D26igigBV4yumJKBvXBJfQ9cNR8OP"
     "Adobe Acrobat Pro" = "https://drive.google.com/uc?export=download&id=1cYVs3Jnw5S9WsBNau3BRie7XaEDPZMhN"
     "Adobe Photoshop 2021" = "https://drive.google.com/uc?export=download&id=1uJNkWEa-R38wY0P9hDWMUQvQ7loQqFAO"
     "Adobe Premiere Pro 2021" = "https://drive.google.com/uc?export=download&id=1Glfk5zp45znq-13aeHGxnKJqDDHDDLUy"
