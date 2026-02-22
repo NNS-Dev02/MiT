@@ -50,7 +50,7 @@ $plainPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
 )
 
 # Mật khẩu đúng (ví dụ: "mit2025")
-$correctPassword = "mitgroup2025"
+$correctPassword = "mitgroup2026"
 
 if ($plainPassword -ne $correctPassword) {
     Write-Host "Sai mật khẩu. Không thể tiếp tục." -ForegroundColor Red
