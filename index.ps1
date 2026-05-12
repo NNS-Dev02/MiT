@@ -1069,6 +1069,8 @@ $appCrack = @{
     "AutoCAD 2025" = "https://drive.google.com/uc?export=download&id=1RMjzCznIJ3hvzel3kPq_xmIkIGQZJLNz"
     "Adobe Lightroom Classic 2024" = "https://drive.google.com/uc?export=download&id=1rCtzKAWgxxTZeH3T5W2N7PDqfmY-2VBD"
     "EaseUS Data Recovery Wizard" = "https://drive.google.com/uc?export=download&id=1fRV9Wp8w67RUjKHnz3jlJwOmG1OCR8KG"
+    "Thay Logo Bios MiT" = "https://drive.google.com/uc?export=download&id=13sUCIKw8AQjkxsOn0qWFwOV1G2VDRDPE"
+
 }
 
 # 2. Hàm chọn ứng dụng App Crack
